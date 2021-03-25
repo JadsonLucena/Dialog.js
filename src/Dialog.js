@@ -111,6 +111,13 @@ class Dialog {
         dialog.title.textContent = title;
         dialog.title.title = title;
 
+        dialog.header.append(dialog.title);
+        dialog.aside.append(dialog.header);
+        dialog.aside.append(dialog.main);
+        dialog.aside.append(dialog.footer);
+        dialog.shadowRoot.append(dialog.aside);
+        document.body.append(dialog.host);
+
     }
 
 }
