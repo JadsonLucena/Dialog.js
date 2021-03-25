@@ -197,9 +197,7 @@ class Dialog {
         script(this.#dialogs[key].main);
 
 
-        this.#dialogs[key].btnResolve = document.createElement('button');
-        this.#dialogs[key].btnResolve.textContent = textResolve;
-        this.#dialogs[key].btnResolve.onmousedown = () => {
+        let resolve = () => {
 
             if (callback(true, this.#dialogs[key].main) == false) {
 
@@ -212,7 +210,24 @@ class Dialog {
             }
 
         };
+
+
+        this.#dialogs[key].btnResolve = document.createElement('button');
+        this.#dialogs[key].btnResolve.textContent = textResolve;
+        this.#dialogs[key].btnResolve.onmousedown = resolve;
         this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+
+
+        this.#dialogs[key].keyDown = e => {
+
+            if (/(Escape|Enter|\s)/i.test(e.key) && !persistent) {
+
+                resolve();
+
+            }
+
+        };
+        this.#dialogs[key].keyUp = () => this.#dialogs[key].btnResolve.classList.remove('denied');
 
 
         this.#dialogs[key].host.onclick = null;
