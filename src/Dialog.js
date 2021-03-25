@@ -97,6 +97,16 @@ class Dialog {
 
         }
 
+        if (typeof footer == 'string') {
+
+            dialog.footer.innerHTML = footer;
+
+        } else {
+
+            dialog.footer.append(footer);
+
+        }
+
     }
 
 }
