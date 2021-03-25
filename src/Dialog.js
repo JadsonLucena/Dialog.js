@@ -306,6 +306,73 @@ class Dialog {
 
     }
 
+    notify(content, {
+        title = '',
+        footer = '',
+        style = '',
+        script = () => {},
+        persistent = false,
+        discreet = true,
+        duration = null
+    } = {}) {
+
+        let key = this.show(content, {
+            title: title,
+            footer: footer,
+            style: `
+                :host { pointer-events: none; background: transparent !important; backdrop-filter: none; z-index: 9999999999; }
+                    :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
+                    ${discreet ? ':host > aside { left: 100%; top: auto; bottom: 10px; transform: auto; }' : ''}
+                    :host(.hide) aside { animation: hide 1s forwards; }
+
+                ${discreet ? `
+                    @keyframes show { from { left: 100%; transform: translateX(0); } to { left: calc(100% - 10px); transform: translateX(-100%); } }
+                    @keyframes hide { from { left: calc(100% - 10px); transform: translateX(-100%); } to { left: 100%; transform: translateX(0); } }
+                ` : `
+                    @keyframes show { from { top: 0; transform: translate(-50%, -100%); } to { top: 10px; transform: translate(-50%, 0); } }
+                    @keyframes hide { from { top: 10px; transform: translate(-50%, 0); } to { top: 0; transform: translate(-50%, -100%); } }
+                `}
+            ` + style,
+            script: script,
+            persistent: persistent
+        });
+
+
+        duration = Math.max(3000, duration == null ? (title +''+ content +''+ footer).replace(/(\s|<\/?[a-z-]+>)/ig, '').length * 55 : duration);
+
+
+        let hide = setTimeout(() => this.#dialogs[key].host.classList.add('hide'), duration - 1000);
+        let close = setTimeout(() => this.close(key), duration);
+
+
+        this.#dialogs[key].host.onclick = null;
+        this.#dialogs[key].keyDown = e => {
+
+            if (e.key == 'Escape' && !persistent) {
+
+                clearTimeout(hide);
+                clearTimeout(close);
+
+                if (!this.#dialogs[key].host.classList.contains('hide')) {
+
+                    this.#dialogs[key].host.classList.add('hide');
+
+                }
+
+                setTimeout(() => this.close(key), 1000);
+
+            }
+
+        };
+
+
+        this.#dialogs[key].host.onclick = null;
+
+
+        return key;
+
+    }
+
     popUp(content, {
         title = '',
         footer = '',
