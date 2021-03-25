@@ -239,6 +239,73 @@ class Dialog {
 
     }
 
+    confirm(content, callback = () => {}, {
+        title = '',
+        style = '',
+        script = () => {},
+        persistent = false,
+        textResolve = 'Ok',
+        textReject = 'No'
+    } = {}) {
+
+        let key = this.alert(content, callback, {
+            title: title,
+            style: style,
+            script: script,
+            persistent: persistent,
+            textResolve: textResolve
+        });
+
+
+        this.#dialogs[key].btnReject = document.createElement('button');
+        this.#dialogs[key].btnReject.textContent = textReject;
+        this.#dialogs[key].btnReject.onclick = () => {
+
+            callback(false, this.#dialogs[key].main);
+            this.close(key);
+
+        };
+
+
+        this.#dialogs[key].keyDown = e => {
+
+            if (e.key == 'Escape' && !persistent) {
+
+                callback(false, this.#dialogs[key].main);
+                this.close(key);
+
+            } else if (/(Enter|\s)/i.test(e.key) && !persistent) {
+
+                if (this.#dialogs[key].footer.querySelector('button:focus') == this.#dialogs[key].btnReject) {
+
+                    callback(false, this.#dialogs[key].main);
+                    this.close(key);
+
+                } else if (this.#dialogs[key].footer.querySelector('button:focus') == this.#dialogs[key].btnResolve) {
+
+                    if (callback(true, this.#dialogs[key].main) == false) {
+
+                        this.#dialogs[key].btnResolve.classList.add('denied');
+
+                    } else {
+
+                        this.close(key);
+
+                    }
+
+                }
+
+            }
+
+        };
+
+
+        this.#dialogs[key].footer.insertBefore(this.#dialogs[key].btnReject, this.#dialogs[key].btnResolve);
+
+        return key;
+
+    }
+
     popUp(content, {
         title = '',
         footer = '',
@@ -325,6 +392,13 @@ class Dialog {
 
             dialog.btnResolve.onclick = null;
             dialog.btnResolve.remove();
+
+        }
+
+        if ('btnReject' in dialog) {
+
+            dialog.btnReject.onclick = null;
+            dialog.btnReject.remove();
 
         }
 
