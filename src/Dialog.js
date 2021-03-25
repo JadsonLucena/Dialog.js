@@ -118,6 +118,9 @@ class Dialog {
         dialog.shadowRoot.append(dialog.aside);
         document.body.append(dialog.host);
 
+
+        script(dialog.main, dialog.footer);
+
     }
 
 }
