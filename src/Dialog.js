@@ -35,4 +35,9 @@ class Dialog {
     get delegatesFocus() { return this.#delegatesFocus; }
     get style() { return this.#style; }
 
+
+    set shadowRootMode(shadowRootMode = 'open') { this.#shadowRootMode = shadowRootMode; }
+    set delegatesFocus(delegatesFocus = false) { this.#delegatesFocus = delegatesFocus; }
+    set style(style = '') { this.#style = style; }
+
 }
