@@ -62,6 +62,11 @@ class Dialog {
             shadowRoot: null
         };
 
+        dialog.shadowRoot = dialog.host.attachShadow({
+            mode: this.#shadowRootMode, // open | close
+            delegatesFocus: this.#delegatesFocus
+        });
+
     }
 
 }
