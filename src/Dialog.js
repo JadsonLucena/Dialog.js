@@ -29,4 +29,10 @@ class Dialog {
 
     }
 
+
+    get dialogs() { return Object.keys(this.#dialogs).reverse(); }
+    get shadowRootMode() { return this.#shadowRootMode; }
+    get delegatesFocus() { return this.#delegatesFocus; }
+    get style() { return this.#style; }
+
 }
