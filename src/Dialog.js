@@ -52,6 +52,16 @@ class Dialog {
 
         let key = performance.now();
 
+        let dialog = {
+            host: document.createElement('custom-dialog'),
+            aside: document.createElement('aside'),
+            header: document.createElement('header'),
+            title: document.createElement('h1'),
+            main: document.createElement('main'),
+            footer: document.createElement('footer'),
+            shadowRoot: null
+        };
+
     }
 
 }
