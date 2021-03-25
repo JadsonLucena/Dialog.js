@@ -107,6 +107,10 @@ class Dialog {
 
         }
 
+
+        dialog.title.textContent = title;
+        dialog.title.title = title;
+
     }
 
 }
