@@ -122,6 +122,16 @@ class Dialog {
         script(dialog.main, dialog.footer);
 
 
+        dialog.host.onclick = e => {
+
+            if (e.path[0] == dialog.host && !persistent) {
+
+                this.close(key);
+
+            }
+
+        };
+
         this.#dialogs[key] = dialog;
 
         return key;
