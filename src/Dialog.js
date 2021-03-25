@@ -173,6 +173,49 @@ class Dialog {
 
     }
 
+    popUp(content, {
+        title = '',
+        footer = '',
+        style = '',
+        script = () => {},
+        persistent = false,
+        fullScreen = false
+    } = {}) {
+
+        let key = this.show(content, {
+            title: title,
+            footer: footer,
+            style: `
+                ${fullScreen ? `
+                    :host > aside > header { flex-direction: row-reverse !important; }
+                    :host > aside > header > span { transform: scaleX(-1); }
+                    :host > aside > header > span:hover { transform: scaleX(-1) scale(1.1) }
+                ` : `
+                    :host > aside > header > span:hover { transform: scale(1.1) }
+                `}
+                
+                :host > aside > header > span { outline: none; user-select: none; width: 40px; height: 40px; cursor: pointer; text-align: center; font-size: 18px; font-weight: bold; display: inline-flex; justify-content: center; align-items: center; }
+                :host > aside > header > h1 { width: calc(100% - 40px); }
+            ` + style,
+            script: script,
+            persistent: persistent,
+            fullScreen: fullScreen
+        });
+
+        this.#dialogs[key].btnClose = document.createElement('span');
+        this.#dialogs[key].btnClose.textContent = fullScreen ? '➜' : '✕';
+        this.#dialogs[key].btnClose.onclick = () => {
+
+            this.close(key);
+
+        };
+
+        this.#dialogs[key].header.append(this.#dialogs[key].btnClose);
+
+        return key;
+
+    }
+
     close(key = null) {
 
         if (key == null) {
@@ -203,6 +246,14 @@ class Dialog {
 
 
         let dialog = this.#dialogs[key];
+
+
+        if ('btnClose' in dialog) {
+
+            dialog.btnClose.onclick = null;
+            dialog.btnClose.remove();
+
+        }
 
 
         dialog.host.onclick = null;
