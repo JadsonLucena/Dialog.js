@@ -27,6 +27,31 @@ class Dialog {
 
         this.#dialogs = {};
 
+
+        window.addEventListener('keydown', e => {
+
+            let keys = Object.keys(this.#dialogs);
+
+            if (keys.length) {
+
+                this.#dialogs[keys.pop()].keyDown(e);
+
+            }
+
+        });
+
+        window.addEventListener('keyup', e => {
+
+            let keys = Object.keys(this.#dialogs);
+
+            if (keys.length) {
+
+                this.#dialogs[keys.pop()].keyUp(e);
+
+            }
+
+        });
+
     }
 
 
@@ -59,7 +84,17 @@ class Dialog {
             title: document.createElement('h1'),
             main: document.createElement('main'),
             footer: document.createElement('footer'),
-            shadowRoot: null
+            shadowRoot: null,
+            keyDown: e => {
+
+                if (e.key == 'Escape' && !persistent) {
+
+                    this.close(key);
+
+                }
+
+            },
+            keyUp: () => {}
         };
 
         dialog.shadowRoot = dialog.host.attachShadow({
