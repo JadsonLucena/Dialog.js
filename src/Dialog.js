@@ -1,3 +1,12 @@
+customElements.define('custom-dialog', class extends HTMLElement {
+    constructor() {
+
+        super();
+
+    }
+});
+
+
 class Dialog {
 
     #shadowRootMode;
