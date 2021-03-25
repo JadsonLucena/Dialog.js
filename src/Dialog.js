@@ -128,4 +128,52 @@ class Dialog {
 
     }
 
+    close(key = null) {
+
+        if (key == null) {
+
+            let keys = Object.keys(this.#dialogs);
+
+            if (keys.length) {
+
+                key = keys.pop();
+
+            } else {
+
+                // throw 'Does not exist';
+                return null;
+
+            }
+
+        } else {
+
+            if (!(key in this.#dialogs)) {
+
+                // throw 'Is not declared';
+                return null;
+
+            }
+
+        }
+
+
+        let dialog = this.#dialogs[key];
+
+
+        dialog.host.onclick = null;
+        dialog.shadowRoot = null;
+        dialog.keyUp = null;
+        dialog.keyDown = null;
+
+        dialog.title.remove();
+        dialog.header.remove();
+        dialog.main.remove();
+        dialog.footer.remove();
+        dialog.aside.remove();
+        dialog.host.remove();
+
+        return delete this.#dialogs[key];
+
+    }
+
 }
