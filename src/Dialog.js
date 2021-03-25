@@ -50,6 +50,8 @@ class Dialog {
         fullScreen = false
     } = {}) {
 
+        let key = performance.now();
+
     }
 
 }
