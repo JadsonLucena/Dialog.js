@@ -40,4 +40,16 @@ class Dialog {
     set delegatesFocus(delegatesFocus = false) { this.#delegatesFocus = delegatesFocus; }
     set style(style = '') { this.#style = style; }
 
+
+    show(content, {
+        title = '',
+        footer = '',
+        style = '',
+        script = () => {},
+        persistent = false,
+        fullScreen = false
+    } = {}) {
+
+    }
+
 }
