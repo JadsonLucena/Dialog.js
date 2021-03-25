@@ -124,6 +124,8 @@ class Dialog {
 
         this.#dialogs[key] = dialog;
 
+        return key;
+
     }
 
 }
