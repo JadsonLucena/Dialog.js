@@ -173,6 +173,57 @@ class Dialog {
 
     }
 
+    alert(content, callback = () => {}, {
+        title = '',
+        style = '',
+        script = () => {},
+        persistent = false,
+        textResolve = 'Ok'
+    } = {}) {
+
+        let key = this.show(content, {
+            title: title,
+            style: `
+                :host > aside > footer { padding: 10px 0 0 0; text-align: right; }
+                    :host > aside > footer > button { outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
+                    :host > aside > footer > button:hover { color: royalblue; background-color: #eee; }
+                    :host > aside > footer > button:focus { color: dodgerblue; }
+                    :host > aside > footer > button.denied { background-color: #ffaaaa; }
+            ` + style,
+            persistent: persistent
+        });
+
+
+        script(this.#dialogs[key].main);
+
+
+        this.#dialogs[key].btnResolve = document.createElement('button');
+        this.#dialogs[key].btnResolve.textContent = textResolve;
+        this.#dialogs[key].btnResolve.onmousedown = () => {
+
+            if (callback(true, this.#dialogs[key].main) == false) {
+
+                this.#dialogs[key].btnResolve.classList.add('denied');
+
+            } else {
+
+                this.close(key);
+
+            }
+
+        };
+        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+
+
+        this.#dialogs[key].host.onclick = null;
+
+
+        this.#dialogs[key].footer.appendChild(this.#dialogs[key].btnResolve).focus();
+
+        return key;
+
+    }
+
     popUp(content, {
         title = '',
         footer = '',
@@ -252,6 +303,13 @@ class Dialog {
 
             dialog.btnClose.onclick = null;
             dialog.btnClose.remove();
+
+        }
+
+        if ('btnResolve' in dialog) {
+
+            dialog.btnResolve.onclick = null;
+            dialog.btnResolve.remove();
 
         }
 
