@@ -121,6 +121,9 @@ class Dialog {
 
         script(dialog.main, dialog.footer);
 
+
+        this.#dialogs[key] = dialog;
+
     }
 
 }
