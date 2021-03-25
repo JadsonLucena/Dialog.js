@@ -86,6 +86,17 @@ class Dialog {
         ` + style + this.#style;
         dialog.shadowRoot.append(css);
 
+
+        if (typeof content == 'string') {
+
+            dialog.main.innerHTML = content;
+
+        } else {
+
+            dialog.main.append(content);
+
+        }
+
     }
 
 }
