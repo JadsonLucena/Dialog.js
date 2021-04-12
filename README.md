@@ -146,5 +146,54 @@ show(
         onClose?: (key: string) => void
     } = {}
 ): string
-
 ```
+
+## How to use
+```javascript
+var dialog = new Dialog();
+
+var popUpKey = dialog.popUp(
+    '<h1>Here will be the content to be displayed</h1>',
+    {
+        title: 'popUp example',
+        footer: '<a href="https://github.com/JadsonLucena/Dialog" target="_blank">Dialog</a>',
+        style: 'a { text-decoration: none; }',
+        script: (main, footer) => {
+
+            main.querySelector('h1').onclick = () => {
+
+                let notifyKey = dialog.notify('Here will be the content to be displayed', {
+                    duration: 5000
+                });
+
+            };
+
+        },
+        fullScreen: true
+    }
+);
+
+var confirmKey = dialog.confirm(
+    '<label><input type="checkbox"> select to proceed</label>',
+    (value, main) => {
+
+        if (value && !main.querySelector('input').checked)
+            return false;
+
+    },
+    {
+        persistent: true,
+        textResolve: 'Next',
+        textReject: 'Cancel'
+    }
+);
+
+setTimeout(() => {
+
+    dialog.dialogs.forEach(key => dialog.close(key));
+
+}, 20000);
+```
+
+> Every method returns the key for the modal created\
+> If the close method returns null, then the dialog was not found
