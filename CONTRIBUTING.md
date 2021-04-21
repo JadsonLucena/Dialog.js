@@ -1,0 +1,4 @@
+- You are free to contribute or to fork this project.
+- Prioritize improvements or corrections that add significant value to the project, however, be sure to keep the project simple and intuitive.
+- Always remember to generate semantic and atomic commits in your development flow with GitFlow.
+- Versioning must be semantic.
