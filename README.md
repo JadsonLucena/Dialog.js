@@ -163,13 +163,15 @@ var popUpKey = dialog.popUp(
             main.querySelector('h1').onclick = () => {
 
                 let notifyKey = dialog.notify('Here will be the content to be displayed', {
-                    duration: 5000
+                    duration: 5000,
+                    onClose: key => console.log('closed notify', key)
                 });
 
             };
 
         },
-        fullScreen: true
+        fullScreen: true,
+        onClose: key => console.log('closed popUp', key)
     }
 );
 
@@ -184,7 +186,8 @@ var confirmKey = dialog.confirm(
     {
         persistent: true,
         textResolve: 'Next',
-        textReject: 'Cancel'
+        textReject: 'Cancel',
+        onClose: key => console.log('closed confirm', key)
     }
 );
 

@@ -72,7 +72,8 @@ class Dialog {
         style = '',
         script = () => {},
         persistent = false,
-        fullScreen = false
+        fullScreen = false,
+        onClose = () => {}
     } = {}) {
 
         let key = performance.now();
@@ -94,7 +95,8 @@ class Dialog {
                 }
 
             },
-            keyUp: () => {}
+            keyUp: () => {},
+            onClose: onClose
         };
 
         dialog.shadowRoot = dialog.host.attachShadow({
@@ -178,7 +180,8 @@ class Dialog {
         style = '',
         script = () => {},
         persistent = false,
-        textResolve = 'Ok'
+        textResolve = 'Ok',
+        onClose = () => {}
     } = {}) {
 
         let key = this.show(content, {
@@ -190,7 +193,8 @@ class Dialog {
                     :host > aside > footer > button:focus { color: dodgerblue; }
                     :host > aside > footer > button.denied { background-color: #ffaaaa; }
             ` + style,
-            persistent: persistent
+            persistent: persistent,
+            onClose: onClose
         });
 
 
@@ -245,7 +249,8 @@ class Dialog {
         script = () => {},
         persistent = false,
         textResolve = 'Ok',
-        textReject = 'No'
+        textReject = 'No',
+        onClose = () => {}
     } = {}) {
 
         let key = this.alert(content, callback, {
@@ -253,7 +258,8 @@ class Dialog {
             style: style,
             script: script,
             persistent: persistent,
-            textResolve: textResolve
+            textResolve: textResolve,
+            onClose: onClose
         });
 
 
@@ -313,7 +319,8 @@ class Dialog {
         script = () => {},
         persistent = false,
         discreet = true,
-        duration = null
+        duration = null,
+        onClose = () => {}
     } = {}) {
 
         let key = this.show(content, {
@@ -334,7 +341,8 @@ class Dialog {
                 `}
             ` + style,
             script: script,
-            persistent: persistent
+            persistent: persistent,
+            onClose: onClose
         });
 
 
@@ -379,7 +387,8 @@ class Dialog {
         style = '',
         script = () => {},
         persistent = false,
-        fullScreen = false
+        fullScreen = false,
+        onClose = () => {}
     } = {}) {
 
         let key = this.show(content, {
@@ -399,7 +408,8 @@ class Dialog {
             ` + style,
             script: script,
             persistent: persistent,
-            fullScreen: fullScreen
+            fullScreen: fullScreen,
+            onClose: onClose
         });
 
         this.#dialogs[key].btnClose = document.createElement('span');
@@ -445,42 +455,44 @@ class Dialog {
         }
 
 
-        let dialog = this.#dialogs[key];
+
+        this.#dialogs[key].onClose(key);
 
 
-        if ('btnClose' in dialog) {
+        if ('btnClose' in this.#dialogs[key]) {
 
-            dialog.btnClose.onclick = null;
-            dialog.btnClose.remove();
-
-        }
-
-        if ('btnResolve' in dialog) {
-
-            dialog.btnResolve.onclick = null;
-            dialog.btnResolve.remove();
+            this.#dialogs[key].btnClose.onclick = null;
+            this.#dialogs[key].btnClose.remove();
 
         }
 
-        if ('btnReject' in dialog) {
+        if ('btnResolve' in this.#dialogs[key]) {
 
-            dialog.btnReject.onclick = null;
-            dialog.btnReject.remove();
+            this.#dialogs[key].btnResolve.onclick = null;
+            this.#dialogs[key].btnResolve.remove();
+
+        }
+
+        if ('btnReject' in this.#dialogs[key]) {
+
+            this.#dialogs[key].btnReject.onclick = null;
+            this.#dialogs[key].btnReject.remove();
 
         }
 
 
-        dialog.host.onclick = null;
-        dialog.shadowRoot = null;
-        dialog.keyUp = null;
-        dialog.keyDown = null;
+        this.#dialogs[key].host.onclick = null;
+        this.#dialogs[key].shadowRoot = null;
+        this.#dialogs[key].keyUp = null;
+        this.#dialogs[key].keyDown = null;
+        this.#dialogs[key].onClose = null;
 
-        dialog.title.remove();
-        dialog.header.remove();
-        dialog.main.remove();
-        dialog.footer.remove();
-        dialog.aside.remove();
-        dialog.host.remove();
+        this.#dialogs[key].title.remove();
+        this.#dialogs[key].header.remove();
+        this.#dialogs[key].main.remove();
+        this.#dialogs[key].footer.remove();
+        this.#dialogs[key].aside.remove();
+        this.#dialogs[key].host.remove();
 
         return delete this.#dialogs[key];
 
