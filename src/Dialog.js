@@ -107,7 +107,7 @@ class Dialog {
 
         let css = document.createElement('style');
         css.textContent = `
-            :host, :host * { margin: 0; padding: 0; box-sizing: border-box; }
+            :host, * { margin: 0; padding: 0; box-sizing: border-box; }
             :host { outline: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.32); backdrop-filter: blur(0.5rem); overflow: hidden; border: none; z-index: 999999999; }
                 :host > aside { position: absolute; padding: 10px; background-color: #fff; color: #000; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
                 ${fullScreen ? `
