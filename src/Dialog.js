@@ -116,8 +116,9 @@ class Dialog {
                     :host > aside { left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 20px); height: max-content; max-height: calc(100% - 20px); border-radius: 3px; }
                 `}
                     :host > aside > header { position: relative; width: 100%; font-size: 18px; text-align: center; display: flex; flex-direction: row; align-items: center; /*border-bottom: 1px solid #eee;*/ z-index: 2; }
-                    :host > aside > header > h1 { display: inline-block; padding: 0 10px; width: 100%; height: max-content; font-size: 20px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-                    :host > aside > main { flex: 1; position: relative; padding: 10px; width: 100%; overflow: auto; z-index: 1; }
+                    :host > aside > header > h1 { display: inline-block; width: 100%; height: max-content; font-size: 20px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+                    :host > aside > header > h1:not(:empty) { padding: 5px 10px; }
+                    :host > aside > main { flex: 1; position: relative; padding: 20px; width: 100%; overflow: auto; z-index: 1; }
                     :host > aside > footer { position: relative; padding: 5px; width: 100%; text-align: center; /*border-bottom: 1px solid #eee;*/ z-index: 3; }
                     :host > aside > footer:empty { padding: 0; }
         ` + style + this.#style;
@@ -187,11 +188,37 @@ class Dialog {
         let key = this.show(content, {
             title: title,
             style: `
-                :host > aside > footer { padding: 10px 0 0 0; text-align: right; }
-                    :host > aside > footer > button { outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
+                :host > aside > footer { text-align: right; }
+                    :host > aside > footer > button { position: relative; outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
                     :host > aside > footer > button:hover { color: royalblue; background-color: #eee; }
                     :host > aside > footer > button:focus { color: dodgerblue; }
+                    :host > aside > footer > button.disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
                     :host > aside > footer > button.denied { background-color: #ffaaaa; }
+                    :host > aside > footer > button.waiting { color: rgba(255, 255, 255, 0); background-color: #eee; }
+                    :host > aside > footer > button.waiting::after {
+                        content: "";
+                        position: absolute;
+                        width: 16px;
+                        height: 16px;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        margin: auto;
+                        border: 4px solid transparent;
+                        border-top-color: #ffffff;
+                        border-radius: 50%;
+                        animation: button-loading-spinner 1s ease infinite;
+                    }
+                    @keyframes button-loading-spinner {
+                        from {
+                            transform: rotate(0turn);
+                        }
+                        
+                        to {
+                            transform: rotate(1turn);
+                        }
+                    }
             ` + style,
             persistent: persistent,
             onClose: onClose
@@ -203,15 +230,28 @@ class Dialog {
 
         let resolve = () => {
 
-            if (callback(true, this.#dialogs[key].main) == false) {
+            this.#dialogs[key].btnResolve.classList.add('waiting');
 
+            Promise.all([callback(true, this.#dialogs[key].main)]).then(e => {
+
+                this.#dialogs[key].btnResolve.classList.remove('waiting');
+
+                if (e.some(e => e == false)) {
+
+                    this.#dialogs[key].btnResolve.classList.add('denied');
+
+                } else {
+
+                    this.close(key);
+
+                }
+
+            }).catch(e => {
+
+                this.#dialogs[key].btnResolve.classList.remove('waiting');
                 this.#dialogs[key].btnResolve.classList.add('denied');
 
-            } else {
-
-                this.close(key);
-
-            }
+            });
 
         };
 
@@ -219,7 +259,8 @@ class Dialog {
         this.#dialogs[key].btnResolve = document.createElement('button');
         this.#dialogs[key].btnResolve.textContent = textResolve;
         this.#dialogs[key].btnResolve.onmousedown = resolve;
-        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
+        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
 
 
         this.#dialogs[key].keyDown = e => {
@@ -263,8 +304,42 @@ class Dialog {
         });
 
 
+        let resolve = () => {
+
+            this.#dialogs[key].btnResolve.classList.add('waiting');
+            this.#dialogs[key].btnReject.classList.add('disabled');
+
+            Promise.all([callback(true, this.#dialogs[key].main)]).then(e => {
+
+                this.#dialogs[key].btnResolve.classList.remove('waiting');
+                this.#dialogs[key].btnReject.classList.remove('disabled');
+
+                if (e.some(e => e == false)) {
+
+                    this.#dialogs[key].btnResolve.classList.add('denied');
+
+                } else {
+
+                    this.close(key);
+
+                }
+
+            }).catch(e => {
+
+                this.#dialogs[key].btnResolve.classList.remove('waiting');
+                this.#dialogs[key].btnReject.classList.remove('disabled');
+                this.#dialogs[key].btnResolve.classList.add('denied');
+
+            });
+
+        };
+
+
         this.#dialogs[key].btnReject = document.createElement('button');
         this.#dialogs[key].btnReject.textContent = textReject;
+        this.#dialogs[key].btnResolve.onmousedown = resolve;
+        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
+        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
         this.#dialogs[key].btnReject.onclick = () => {
 
             callback(false, this.#dialogs[key].main);
@@ -289,15 +364,7 @@ class Dialog {
 
                 } else if (this.#dialogs[key].footer.querySelector('button:focus') == this.#dialogs[key].btnResolve) {
 
-                    if (callback(true, this.#dialogs[key].main) == false) {
-
-                        this.#dialogs[key].btnResolve.classList.add('denied');
-
-                    } else {
-
-                        this.close(key);
-
-                    }
+                    resolve();
 
                 }
 
