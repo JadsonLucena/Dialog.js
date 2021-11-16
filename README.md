@@ -40,7 +40,7 @@ style(arg?: string = ''): viod
 // Methods
 alert(
     content: string | HTMLElement,
-    callback: (flag: boolean, main: HTMLElement) => boolean | void,
+    callback: (flag: boolean, main: HTMLElement) => boolean | Promise<any> | void,
     {
         title = '',
         style = '',
@@ -62,7 +62,7 @@ close(key?: (string | null) = null): boolean | null // If a key is not inserted,
 
 confirm(
     content: string | HTMLElement,
-    callback: (flag: boolean, main: HTMLElement) => boolean | void,
+    callback: (flag: boolean, main: HTMLElement) => boolean | Promise<any> | void,
     {
         title = '',
         style = '',
@@ -163,6 +163,7 @@ var popUpKey = dialog.popUp(
             main.querySelector('h1').onclick = () => {
 
                 let notifyKey = dialog.notify('Here will be the content to be displayed', {
+                    discreet: true,
                     duration: 5000,
                     onClose: key => console.log('closed notify', key)
                 });
@@ -176,11 +177,25 @@ var popUpKey = dialog.popUp(
 );
 
 var confirmKey = dialog.confirm(
-    '<label><input type="checkbox"> select to proceed</label>',
-    (value, main) => {
+    `
+        <label><input type="radio" name="test" id="boolean"> Select to proceed with Boolean false</label><br>
+        <label><input type="radio" name="test" id="promise"> Select to proceed with Promise resolve</label>
+    `,
+    (flag, main) => {
 
-        if (value && !main.querySelector('input').checked)
-            return false;
+        if (flag) {
+
+            if (main.querySelector('input#boolean').checked) {
+
+                return false;
+
+            } else if (main.querySelector('input#promise').checked) {
+
+                return new Promise((resolve, reject) => setTimeout(resolve, 1_500));
+
+            }
+
+        }
 
     },
     {
@@ -195,7 +210,7 @@ setTimeout(() => {
 
     dialog.dialogs.forEach(key => dialog.close(key));
 
-}, 20000);
+}, 20_000);
 ```
 
 > Every method returns the key for the modal created\
