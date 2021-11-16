@@ -76,7 +76,7 @@ class Dialog {
         onClose = () => {}
     } = {}) {
 
-        let key = performance.now();
+        let key = crypto.randomUUID();
 
         let dialog = {
             host: document.createElement('custom-dialog'),
