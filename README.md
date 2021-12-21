@@ -149,68 +149,75 @@ show(
 ```
 
 ## How to use
-```javascript
-var dialog = new Dialog();
+```html
+<script src="https://cdn.jsdelivr.net/gh/JadsonLucena/Dialog@main/src/Dialog.js"></script>
+<script>
+window.onload = () => {
 
-var popUpKey = dialog.popUp(
-    '<h1>Here will be the content to be displayed</h1>',
-    {
-        title: 'popUp example',
-        footer: '<a href="https://github.com/JadsonLucena/Dialog" target="_blank">Dialog</a>',
-        style: 'a { text-decoration: none; }',
-        script: (main, footer) => {
+    var dialog = new Dialog();
 
-            main.querySelector('h1').onclick = () => {
+    var popUpKey = dialog.popUp(
+        '<h1>Here will be the content to be displayed</h1>',
+        {
+            title: 'popUp example',
+            footer: '<a href="https://github.com/JadsonLucena/Dialog" target="_blank">Dialog</a>',
+            style: 'a { text-decoration: none; }',
+            script: (main, footer) => {
 
-                let notifyKey = dialog.notify('Here will be the content to be displayed', {
-                    discreet: true,
-                    duration: 5000,
-                    onClose: key => console.log('closed notify', key)
-                });
+                main.querySelector('h1').onclick = () => {
 
-            };
+                    let notifyKey = dialog.notify('Here will be the content to be displayed', {
+                        discreet: true,
+                        duration: 5000,
+                        onClose: key => console.log('closed notify', key)
+                    });
 
-        },
-        fullScreen: true,
-        onClose: key => console.log('closed popUp', key)
-    }
-);
+                };
 
-var confirmKey = dialog.confirm(
-    `
-        <label><input type="radio" name="test" id="boolean"> Select to proceed with Boolean false</label><br>
-        <label><input type="radio" name="test" id="promise"> Select to proceed with Promise resolve</label>
-    `,
-    (flag, main) => {
+            },
+            fullScreen: true,
+            onClose: key => console.log('closed popUp', key)
+        }
+    );
 
-        if (flag) {
+    var confirmKey = dialog.confirm(
+        `
+            <label><input type="radio" name="test" id="boolean"> Select to proceed with Boolean false</label><br>
+            <label><input type="radio" name="test" id="promise"> Select to proceed with Promise resolve</label>
+        `,
+        (flag, main) => {
 
-            if (main.querySelector('input#boolean').checked) {
+            if (flag) {
 
-                return false;
+                if (main.querySelector('input#boolean').checked) {
 
-            } else if (main.querySelector('input#promise').checked) {
+                    return false;
 
-                return new Promise((resolve, reject) => setTimeout(resolve, 1_500));
+                } else if (main.querySelector('input#promise').checked) {
+
+                    return new Promise((resolve, reject) => setTimeout(resolve, 1_500));
+
+                }
 
             }
 
+        },
+        {
+            persistent: true,
+            textResolve: 'Next',
+            textReject: 'Cancel',
+            onClose: key => console.log('closed confirm', key)
         }
+    );
 
-    },
-    {
-        persistent: true,
-        textResolve: 'Next',
-        textReject: 'Cancel',
-        onClose: key => console.log('closed confirm', key)
-    }
-);
+    setTimeout(() => {
 
-setTimeout(() => {
+        dialog.dialogs.forEach(key => dialog.close(key));
 
-    dialog.dialogs.forEach(key => dialog.close(key));
+    }, 20_000);
 
-}, 20_000);
+};
+</script>
 ```
 
 > Every method returns the key for the modal created\
