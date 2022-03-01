@@ -1,4 +1,4 @@
-# Dialog
+# Dialog.js
 Get all the main dialog boxes dynamically and responsively
 
 
