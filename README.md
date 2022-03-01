@@ -150,7 +150,7 @@ show(
 
 ## How to use
 ```html
-<script src="https://cdn.jsdelivr.net/gh/JadsonLucena/Dialog@main/src/Dialog.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/JadsonLucena/Dialog.js@main/src/Dialog.js"></script>
 <script>
 window.onload = () => {
 
@@ -160,7 +160,7 @@ window.onload = () => {
         '<h1>Here will be the content to be displayed</h1>',
         {
             title: 'popUp example',
-            footer: '<a href="https://github.com/JadsonLucena/Dialog" target="_blank">Dialog</a>',
+            footer: '<a href="https://github.com/JadsonLucena/Dialog.js" target="_blank">Dialog</a>',
             style: 'a { text-decoration: none; }',
             script: (main, footer) => {
 
