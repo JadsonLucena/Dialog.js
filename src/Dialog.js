@@ -225,7 +225,12 @@ class Dialog {
         });
 
 
-        script(this.#dialogs[key].main);
+        this.#dialogs[key].btnResolve = document.createElement('button');
+        this.#dialogs[key].btnResolve.textContent = textResolve;
+        this.#dialogs[key].btnResolve.classList.add('disabled');
+
+
+        Promise.all([script(this.#dialogs[key].main)]).finally(() => this.#dialogs[key].btnResolve.classList.remove('disabled'));
 
 
         let resolve = () => {
@@ -256,11 +261,9 @@ class Dialog {
         };
 
 
-        this.#dialogs[key].btnResolve = document.createElement('button');
-        this.#dialogs[key].btnResolve.textContent = textResolve;
         this.#dialogs[key].btnResolve.onmousedown = resolve;
-        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
-        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
+        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
 
 
         this.#dialogs[key].keyDown = e => {
@@ -304,6 +307,10 @@ class Dialog {
         });
 
 
+        this.#dialogs[key].btnReject = document.createElement('button');
+        this.#dialogs[key].btnReject.textContent = textReject;
+
+
         let resolve = () => {
 
             this.#dialogs[key].btnResolve.classList.add('waiting');
@@ -334,12 +341,9 @@ class Dialog {
 
         };
 
-
-        this.#dialogs[key].btnReject = document.createElement('button');
-        this.#dialogs[key].btnReject.textContent = textReject;
         this.#dialogs[key].btnResolve.onmousedown = resolve;
-        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
-        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');;
+        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
         this.#dialogs[key].btnReject.onclick = () => {
 
             callback(false, this.#dialogs[key].main);
