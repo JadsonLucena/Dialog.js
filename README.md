@@ -51,7 +51,7 @@ alert(
     }: {
         title?: string,
         style?: string,
-        script?: (main: HTMLElement) => void,
+        script?: (main: HTMLElement) => Promise<any> | void,
         persistent?: boolean,
         textResolve?: string,
         onClose?: (key: string) => void
@@ -74,7 +74,7 @@ confirm(
     }: {
         title?: string,
         style?: string,
-        script?: (main: HTMLElement) => void,
+        script?: (main: HTMLElement) => Promise<any> | void,
         persistent?: boolean,
         textResolve?: string,
         textReject?: string,
@@ -206,7 +206,8 @@ window.onload = () => {
             persistent: true,
             textResolve: 'Next',
             textReject: 'Cancel',
-            onClose: key => console.log('closed confirm', key)
+            onClose: key => console.log('closed confirm', key),
+            script: main => new Promise(resolve => setTimeout(resolve, 3_000))
         }
     );
 
