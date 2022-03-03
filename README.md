@@ -148,78 +148,8 @@ show(
 ): string
 ```
 
-## How to use
-```html
-<script src="https://cdn.jsdelivr.net/gh/JadsonLucena/Dialog.js@main/src/Dialog.js"></script>
-<script>
-window.onload = () => {
-
-    var dialog = new Dialog();
-
-    var popUpKey = dialog.popUp(
-        '<h1>Here will be the content to be displayed</h1>',
-        {
-            title: 'popUp example',
-            footer: '<a href="https://github.com/JadsonLucena/Dialog.js" target="_blank">Dialog</a>',
-            style: 'a { text-decoration: none; }',
-            script: (main, footer) => {
-
-                main.querySelector('h1').onclick = () => {
-
-                    let notifyKey = dialog.notify('Here will be the content to be displayed', {
-                        discreet: true,
-                        duration: 5000,
-                        onClose: key => console.log('closed notify', key)
-                    });
-
-                };
-
-            },
-            fullScreen: true,
-            onClose: key => console.log('closed popUp', key)
-        }
-    );
-
-    var confirmKey = dialog.confirm(
-        `
-            <label><input type="radio" name="test" id="boolean"> Select to proceed with Boolean false</label><br>
-            <label><input type="radio" name="test" id="promise"> Select to proceed with Promise resolve</label>
-        `,
-        (flag, main) => {
-
-            if (flag) {
-
-                if (main.querySelector('input#boolean').checked) {
-
-                    return false;
-
-                } else if (main.querySelector('input#promise').checked) {
-
-                    return new Promise((resolve, reject) => setTimeout(resolve, 1_500));
-
-                }
-
-            }
-
-        },
-        {
-            persistent: true,
-            textResolve: 'Next',
-            textReject: 'Cancel',
-            onClose: key => console.log('closed confirm', key),
-            script: main => new Promise(resolve => setTimeout(resolve, 3_000))
-        }
-    );
-
-    setTimeout(() => {
-
-        dialog.dialogs.forEach(key => dialog.close(key));
-
-    }, 20_000);
-
-};
-</script>
-```
+## QuickStart
+[![Edit Dialog.js](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/dialog-js-ewfgew?autoresize=1&expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark)
 
 > Every method returns the key for the modal created\
 > If the close method returns null, then the dialog was not found
