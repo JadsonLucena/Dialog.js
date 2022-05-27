@@ -13,7 +13,7 @@ class Dialog {
     #delegatesFocus;
     #style;
 
-    #dialogs;
+    #list;
 
     constructor({
         shadowRootMode = 'open',
@@ -25,16 +25,16 @@ class Dialog {
         this.#delegatesFocus = delegatesFocus;
         this.#style = style;
 
-        this.#dialogs = {};
+        this.#list = {};
 
 
         window.addEventListener('keydown', e => {
 
-            let keys = Object.keys(this.#dialogs);
+            let keys = Object.keys(this.#list);
 
             if (keys.length) {
 
-                this.#dialogs[keys.pop()].keyDown(e);
+                this.#list[keys.pop()].keyDown(e);
 
             }
 
@@ -42,11 +42,11 @@ class Dialog {
 
         window.addEventListener('keyup', e => {
 
-            let keys = Object.keys(this.#dialogs);
+            let keys = Object.keys(this.#list);
 
             if (keys.length) {
 
-                this.#dialogs[keys.pop()].keyUp(e);
+                this.#list[keys.pop()].keyUp(e);
 
             }
 
@@ -55,7 +55,7 @@ class Dialog {
     }
 
 
-    get dialogs() { return Object.keys(this.#dialogs).reverse(); }
+    get list() { return Object.keys(this.#list).reverse(); }
     get shadowRootMode() { return this.#shadowRootMode; }
     get delegatesFocus() { return this.#delegatesFocus; }
     get style() { return this.#style; }
@@ -170,7 +170,7 @@ class Dialog {
 
         };
 
-        this.#dialogs[key] = dialog;
+        this.#list[key] = dialog;
 
         return key;
 
@@ -225,25 +225,25 @@ class Dialog {
         });
 
 
-        this.#dialogs[key].btnResolve = document.createElement('button');
-        this.#dialogs[key].btnResolve.textContent = textResolve;
-        this.#dialogs[key].btnResolve.classList.add('disabled');
+        this.#list[key].btnResolve = document.createElement('button');
+        this.#list[key].btnResolve.textContent = textResolve;
+        this.#list[key].btnResolve.classList.add('disabled');
 
 
-        Promise.all([script(this.#dialogs[key].main)]).finally(() => this.#dialogs[key].btnResolve.classList.remove('disabled'));
+        Promise.all([script(this.#list[key].main)]).finally(() => this.#list[key].btnResolve.classList.remove('disabled'));
 
 
         let resolve = () => {
 
-            this.#dialogs[key].btnResolve.classList.add('waiting');
+            this.#list[key].btnResolve.classList.add('waiting');
 
-            Promise.all([callback(true, this.#dialogs[key].main)]).then(e => {
+            Promise.all([callback(true, this.#list[key].main)]).then(e => {
 
-                this.#dialogs[key].btnResolve.classList.remove('waiting');
+                this.#list[key].btnResolve.classList.remove('waiting');
 
                 if (e.some(e => e == false)) {
 
-                    this.#dialogs[key].btnResolve.classList.add('denied');
+                    this.#list[key].btnResolve.classList.add('denied');
 
                 } else {
 
@@ -253,20 +253,20 @@ class Dialog {
 
             }).catch(e => {
 
-                this.#dialogs[key].btnResolve.classList.remove('waiting');
-                this.#dialogs[key].btnResolve.classList.add('denied');
+                this.#list[key].btnResolve.classList.remove('waiting');
+                this.#list[key].btnResolve.classList.add('denied');
 
             });
 
         };
 
 
-        this.#dialogs[key].btnResolve.onmousedown = resolve;
-        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');
-        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+        this.#list[key].btnResolve.onmousedown = resolve;
+        this.#list[key].btnResolve.onmouseenter = () => this.#list[key].btnResolve.classList.remove('denied');
+        this.#list[key].btnResolve.onmouseup = () => this.#list[key].btnResolve.classList.remove('denied');
 
 
-        this.#dialogs[key].keyDown = e => {
+        this.#list[key].keyDown = e => {
 
             if (/(Escape|Enter|\s)/i.test(e.key) && !persistent) {
 
@@ -275,13 +275,13 @@ class Dialog {
             }
 
         };
-        this.#dialogs[key].keyUp = () => this.#dialogs[key].btnResolve.classList.remove('denied');
+        this.#list[key].keyUp = () => this.#list[key].btnResolve.classList.remove('denied');
 
 
-        this.#dialogs[key].host.onclick = null;
+        this.#list[key].host.onclick = null;
 
 
-        this.#dialogs[key].footer.appendChild(this.#dialogs[key].btnResolve).focus();
+        this.#list[key].footer.appendChild(this.#list[key].btnResolve).focus();
 
         return key;
 
@@ -307,23 +307,23 @@ class Dialog {
         });
 
 
-        this.#dialogs[key].btnReject = document.createElement('button');
-        this.#dialogs[key].btnReject.textContent = textReject;
+        this.#list[key].btnReject = document.createElement('button');
+        this.#list[key].btnReject.textContent = textReject;
 
 
         let resolve = () => {
 
-            this.#dialogs[key].btnResolve.classList.add('waiting');
-            this.#dialogs[key].btnReject.classList.add('disabled');
+            this.#list[key].btnResolve.classList.add('waiting');
+            this.#list[key].btnReject.classList.add('disabled');
 
-            Promise.all([callback(true, this.#dialogs[key].main)]).then(e => {
+            Promise.all([callback(true, this.#list[key].main)]).then(e => {
 
-                this.#dialogs[key].btnResolve.classList.remove('waiting');
-                this.#dialogs[key].btnReject.classList.remove('disabled');
+                this.#list[key].btnResolve.classList.remove('waiting');
+                this.#list[key].btnReject.classList.remove('disabled');
 
                 if (e.some(e => e == false)) {
 
-                    this.#dialogs[key].btnResolve.classList.add('denied');
+                    this.#list[key].btnResolve.classList.add('denied');
 
                 } else {
 
@@ -333,40 +333,40 @@ class Dialog {
 
             }).catch(e => {
 
-                this.#dialogs[key].btnResolve.classList.remove('waiting');
-                this.#dialogs[key].btnReject.classList.remove('disabled');
-                this.#dialogs[key].btnResolve.classList.add('denied');
+                this.#list[key].btnResolve.classList.remove('waiting');
+                this.#list[key].btnReject.classList.remove('disabled');
+                this.#list[key].btnResolve.classList.add('denied');
 
             });
 
         };
 
-        this.#dialogs[key].btnResolve.onmousedown = resolve;
-        this.#dialogs[key].btnResolve.onmouseenter = () => this.#dialogs[key].btnResolve.classList.remove('denied');
-        this.#dialogs[key].btnResolve.onmouseup = () => this.#dialogs[key].btnResolve.classList.remove('denied');
-        this.#dialogs[key].btnReject.onclick = () => {
+        this.#list[key].btnResolve.onmousedown = resolve;
+        this.#list[key].btnResolve.onmouseenter = () => this.#list[key].btnResolve.classList.remove('denied');
+        this.#list[key].btnResolve.onmouseup = () => this.#list[key].btnResolve.classList.remove('denied');
+        this.#list[key].btnReject.onclick = () => {
 
-            callback(false, this.#dialogs[key].main);
+            callback(false, this.#list[key].main);
             this.close(key);
 
         };
 
 
-        this.#dialogs[key].keyDown = e => {
+        this.#list[key].keyDown = e => {
 
             if (e.key == 'Escape' && !persistent) {
 
-                callback(false, this.#dialogs[key].main);
+                callback(false, this.#list[key].main);
                 this.close(key);
 
             } else if (/(Enter|\s)/i.test(e.key) && !persistent) {
 
-                if (this.#dialogs[key].footer.querySelector('button:focus') == this.#dialogs[key].btnReject) {
+                if (this.#list[key].footer.querySelector('button:focus') == this.#list[key].btnReject) {
 
-                    callback(false, this.#dialogs[key].main);
+                    callback(false, this.#list[key].main);
                     this.close(key);
 
-                } else if (this.#dialogs[key].footer.querySelector('button:focus') == this.#dialogs[key].btnResolve) {
+                } else if (this.#list[key].footer.querySelector('button:focus') == this.#list[key].btnResolve) {
 
                     resolve();
 
@@ -377,7 +377,7 @@ class Dialog {
         };
 
 
-        this.#dialogs[key].footer.insertBefore(this.#dialogs[key].btnReject, this.#dialogs[key].btnResolve);
+        this.#list[key].footer.insertBefore(this.#list[key].btnReject, this.#list[key].btnResolve);
 
         return key;
 
@@ -420,21 +420,21 @@ class Dialog {
         duration = Math.max(3000, duration == null ? (title +''+ content +''+ footer).replace(/(\s|<\/?[a-z-]+>)/ig, '').length * 55 : duration);
 
 
-        let hide = setTimeout(() => this.#dialogs[key].host.classList.add('hide'), duration - 1000);
+        let hide = setTimeout(() => this.#list[key].host.classList.add('hide'), duration - 1000);
         let close = setTimeout(() => this.close(key), duration);
 
 
-        this.#dialogs[key].host.onclick = null;
-        this.#dialogs[key].keyDown = e => {
+        this.#list[key].host.onclick = null;
+        this.#list[key].keyDown = e => {
 
             if (e.key == 'Escape' && !persistent) {
 
                 clearTimeout(hide);
                 clearTimeout(close);
 
-                if (!this.#dialogs[key].host.classList.contains('hide')) {
+                if (!this.#list[key].host.classList.contains('hide')) {
 
-                    this.#dialogs[key].host.classList.add('hide');
+                    this.#list[key].host.classList.add('hide');
 
                 }
 
@@ -445,7 +445,7 @@ class Dialog {
         };
 
 
-        this.#dialogs[key].host.onclick = null;
+        this.#list[key].host.onclick = null;
 
 
         return key;
@@ -483,15 +483,15 @@ class Dialog {
             onClose: onClose
         });
 
-        this.#dialogs[key].btnClose = document.createElement('span');
-        this.#dialogs[key].btnClose.textContent = fullScreen ? '➜' : '✕';
-        this.#dialogs[key].btnClose.onclick = () => {
+        this.#list[key].btnClose = document.createElement('span');
+        this.#list[key].btnClose.textContent = fullScreen ? '➜' : '✕';
+        this.#list[key].btnClose.onclick = () => {
 
             this.close(key);
 
         };
 
-        this.#dialogs[key].header.append(this.#dialogs[key].btnClose);
+        this.#list[key].header.append(this.#list[key].btnClose);
 
         return key;
 
@@ -501,7 +501,7 @@ class Dialog {
 
         if (key == null) {
 
-            let keys = Object.keys(this.#dialogs);
+            let keys = Object.keys(this.#list);
 
             if (keys.length) {
 
@@ -516,7 +516,7 @@ class Dialog {
 
         } else {
 
-            if (!(key in this.#dialogs)) {
+            if (!(key in this.#list)) {
 
                 // throw 'Is not declared';
                 return null;
@@ -527,45 +527,45 @@ class Dialog {
 
 
 
-        this.#dialogs[key].onClose(key);
+        this.#list[key].onClose(key);
 
 
-        if ('btnClose' in this.#dialogs[key]) {
+        if ('btnClose' in this.#list[key]) {
 
-            this.#dialogs[key].btnClose.onclick = null;
-            this.#dialogs[key].btnClose.remove();
-
-        }
-
-        if ('btnResolve' in this.#dialogs[key]) {
-
-            this.#dialogs[key].btnResolve.onclick = null;
-            this.#dialogs[key].btnResolve.remove();
+            this.#list[key].btnClose.onclick = null;
+            this.#list[key].btnClose.remove();
 
         }
 
-        if ('btnReject' in this.#dialogs[key]) {
+        if ('btnResolve' in this.#list[key]) {
 
-            this.#dialogs[key].btnReject.onclick = null;
-            this.#dialogs[key].btnReject.remove();
+            this.#list[key].btnResolve.onclick = null;
+            this.#list[key].btnResolve.remove();
+
+        }
+
+        if ('btnReject' in this.#list[key]) {
+
+            this.#list[key].btnReject.onclick = null;
+            this.#list[key].btnReject.remove();
 
         }
 
 
-        this.#dialogs[key].host.onclick = null;
-        this.#dialogs[key].shadowRoot = null;
-        this.#dialogs[key].keyUp = null;
-        this.#dialogs[key].keyDown = null;
-        this.#dialogs[key].onClose = null;
+        this.#list[key].host.onclick = null;
+        this.#list[key].shadowRoot = null;
+        this.#list[key].keyUp = null;
+        this.#list[key].keyDown = null;
+        this.#list[key].onClose = null;
 
-        this.#dialogs[key].title.remove();
-        this.#dialogs[key].header.remove();
-        this.#dialogs[key].main.remove();
-        this.#dialogs[key].footer.remove();
-        this.#dialogs[key].aside.remove();
-        this.#dialogs[key].host.remove();
+        this.#list[key].title.remove();
+        this.#list[key].header.remove();
+        this.#list[key].main.remove();
+        this.#list[key].footer.remove();
+        this.#list[key].aside.remove();
+        this.#list[key].host.remove();
 
-        return delete this.#dialogs[key];
+        return delete this.#list[key];
 
     }
 

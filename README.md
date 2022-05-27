@@ -18,7 +18,7 @@ Dialog(
 
 ```javascript
 // Getters
-dialogs(): string[] // List reverted of created dialog ID's
+list(): string[] // List reverted of created dialog ID's
 
 shadowRootMode(): 'open' | 'closed'
 
