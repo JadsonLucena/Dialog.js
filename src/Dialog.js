@@ -28,6 +28,23 @@ class Dialog {
         this.#list = {};
 
 
+        window.addEventListener('click', e => {
+
+            let triggeredDialogs = e.composedPath().filter(tag => tag.tagName == 'CUSTOM-DIALOG').length;
+
+            for (let key of Object.keys(this.#list)) {
+
+                if (!triggeredDialogs && this.#list[key].target && !this.#list[key].persistent && (!e.composedPath().includes(this.#list[key].aside) && !e.composedPath().includes(this.#list[key].target))) {
+
+                    this.#list[key].host.style.display = '';
+                    this.#list[key].host.classList.remove('fix');
+
+                }
+
+            }
+
+        });
+
         window.addEventListener('keydown', e => {
 
             let keys = Object.keys(this.#list);
@@ -52,6 +69,20 @@ class Dialog {
 
         });
 
+        window.addEventListener('resize', e => {
+
+            for (let key of Object.keys(this.#list)) {
+
+                if (this.#list[key].target && this.#list[key].host.classList.contains('fix')) {
+
+                    this.#list[key].position();
+
+                }
+
+            }
+
+        });
+
     }
 
 
@@ -70,14 +101,15 @@ class Dialog {
         title = '',
         footer = '',
         style = '',
+        target = null,
         script = () => {},
         persistent = false,
-        fullScreen = false,
         onClose = () => {},
         onHelp = undefined
     } = {}) {
 
         let key = crypto.randomUUID();
+
 
         let dialog = {
             host: document.createElement('custom-dialog'),
@@ -85,19 +117,12 @@ class Dialog {
             header: document.createElement('header'),
             title: document.createElement('h1'),
             main: document.createElement('main'),
-            help: document.createElement('div'),
             footer: document.createElement('footer'),
+            help: document.createElement('div'),
             footerContent: document.createElement('section'),
+            target,
+            persistent,
             shadowRoot: null,
-            keyDown: e => {
-
-                if (e.key == 'Escape' && !persistent) {
-
-                    this.close(key);
-
-                }
-
-            },
             keyUp: () => {},
             onClose: onClose
         };
@@ -106,19 +131,38 @@ class Dialog {
             mode: this.#shadowRootMode, // open | close
             delegatesFocus: this.#delegatesFocus
         });
+        dialog.keyDown = e => {
+
+            if (e.key == 'Escape' && !persistent) {
+
+                if (target) {
+
+                    dialog.host.classList.remove('fix');
+                    dialog.host.style.display = '';
+
+                } else {
+
+                    this.close(key);
+
+                }
+
+            }
+
+        };
 
 
         let css = document.createElement('style');
         css.textContent = this.#style + style + `
             :host, * { margin: 0; padding: 0; box-sizing: border-box; }
-            :host { outline: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.32); backdrop-filter: blur(0.5rem); overflow: hidden; border: none; z-index: 999999999; }
-                :host > aside { position: absolute; padding: 10px; background-color: #fff; color: #000; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
-                ${fullScreen ? `
-                    :host > aside { padding: 0; width: 100%; height: 100%; }
-                    :host > aside > footer > div { margin: 10px !important; }
-                ` : `
-                    :host > aside { left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 20px); height: max-content; max-height: calc(100% - 20px); border-radius: 3px; }
-                `}
+            :host { outline: none; border: none; z-index: 999999999; }
+            :host > aside { padding: 10px; width: max-content;  height: max-content; background-color: #fff; color: #000; border-radius: 3px; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
+            ${target ? `
+                :host { display: none; pointer-events: none; position: absolute; width: max-content; height: max-content; background: transparent; }
+                :host > aside { pointer-events: auto; max-width: inherit; max-height: inherit; }
+            ` : `
+                :host { position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.32); backdrop-filter: blur(0.5rem); }
+                :host > aside { position: absolute; left: 50%; top: 50%; max-width: calc(100% - 20px); max-height: calc(100% - 20px); transform: translate(-50%, -50%); }
+            `}
                     :host > aside > header { position: relative; width: 100%; font-size: 18px; text-align: center; display: flex; align-items: center; z-index: 2; }
                     :host > aside > header > h1 { flex: 1; display: inline-block; height: max-content; font-size: 20px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
                     :host > aside > header > h1:not(:empty) { padding: 5px 10px; }
@@ -169,6 +213,46 @@ class Dialog {
         document.body.append(dialog.host);
 
 
+        if (target) {
+
+            dialog.position = e => {
+
+                let scrollLeft = window.scrollX || document.body.scrollLeft;
+                let scrollTop = window.scrollY || document.body.scrollTop;
+
+                let vl = target.offsetLeft - scrollLeft;
+                let vt = target.offsetTop - scrollTop;                
+
+                dialog.host.style = `
+                    display: initial;
+                    ${(vl <= window.innerWidth / 2) ? `left: `+ (target.offsetLeft + target.clientWidth) : `right: `+ (document.body.clientWidth - target.offsetLeft)}px;
+                    ${(vt <= window.innerHeight / 2) ? `top: `+ (target.offsetTop + target.clientHeight) : `bottom: `+ (document.body.clientHeight - target.offsetTop)}px;
+                    max-width: calc(100vw - ${(vl > window.innerWidth / 2) ? window.innerWidth - vl : vl + target.clientWidth}px);
+                    max-height: calc(100vh - ${(vt > window.innerHeight / 2) ? window.innerHeight - vt : vt + target.clientHeight}px);
+                `;
+
+            };
+
+            target.onmouseenter = dialog.position;
+            target.onclick = e => {
+
+                dialog.host.style.display = 'initial';
+                dialog.host.classList.toggle('fix');
+
+            };
+            target.onmouseleave = e => {
+
+                if (!dialog.host.classList.contains('fix')) {
+
+                    dialog.host.style.display = '';
+
+                }
+
+            };
+
+        }
+
+
         script(dialog.main, dialog.footerContent);
 
 
@@ -177,13 +261,14 @@ class Dialog {
 
         dialog.host.onclick = e => {
 
-            if (e.path[0] == dialog.host && !persistent) {
+            if (e.composedPath()[0] == dialog.host && (!persistent && !target)) {
 
                 this.close(key);
 
             }
 
         };
+
 
         this.#list[key] = dialog;
 
@@ -211,21 +296,7 @@ class Dialog {
                     :host > aside > footer > section > button.disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
                     :host > aside > footer > section > button.denied { background-color: #ffaaaa; }
                     :host > aside > footer > section > button.waiting { color: rgba(255, 255, 255, 0); background-color: #eee; }
-                    :host > aside > footer > section > button.waiting::after {
-                        content: "";
-                        position: absolute;
-                        width: 16px;
-                        height: 16px;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                        margin: auto;
-                        border: 4px solid transparent;
-                        border-top-color: #ffffff;
-                        border-radius: 50%;
-                        animation: button-loading-spinner 1s ease infinite;
-                    }
+                    :host > aside > footer > section > button.waiting::after { content: ""; position: absolute; width: 16px; height: 16px; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 4px solid transparent; border-top-color: #ffffff; border-radius: 50%; animation: button-loading-spinner 1s ease infinite; }
                     @keyframes button-loading-spinner {
                         from {
                             transform: rotate(0turn);
@@ -420,7 +491,9 @@ class Dialog {
             style: style + `
                 :host { pointer-events: none; background: transparent !important; backdrop-filter: none; z-index: 9999999999; }
                     :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
-                    ${discreet ? ':host > aside { left: 100%; top: auto; bottom: 10px; transform: auto; }' : ''}
+                    ${discreet ? `
+                        :host > aside { left: 100%; top: auto; bottom: 10px; transform: auto; }
+                    ` : ''}
                     :host(.hide) aside { animation: hide 1s forwards; }
 
                 ${discreet ? `
@@ -489,9 +562,11 @@ class Dialog {
             footer,
             style: style + `
                 ${fullScreen ? `
+                    :host > aside { padding: 0 !important; left: 0 !important; top: 0 !important; transform: none !important; width: 100% !important; max-width: initial !important; height: 100% !important; max-height: initial !important; border-radius: initial !important; }
                     :host > aside > header { flex-direction: row-reverse !important; }
                     :host > aside > header > span { transform: scaleX(-1); }
                     :host > aside > header > span:hover { transform: scaleX(-1) scale(1.1) }
+                    :host > aside > footer > div { margin: 10px !important; }
                 ` : `
                     :host > aside > header > span:hover { transform: scale(1.1) }
                 `}
@@ -500,7 +575,6 @@ class Dialog {
             `,
             script,
             persistent,
-            fullScreen,
             onClose,
             onHelp
         });
@@ -551,6 +625,15 @@ class Dialog {
 
         this.#list[key].onClose(key);
 
+
+        if (this.#list[key].target) {
+
+            this.#list[key].target.onmouseenter = null;
+            this.#list[key].target.onclick = null;
+            this.#list[key].target.onmouseleave = null;
+            this.#list[key].position = null;
+
+        }
 
         if ('btnClose' in this.#list[key]) {
 
