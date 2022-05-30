@@ -109,7 +109,7 @@ class Dialog {
 
 
         let css = document.createElement('style');
-        css.textContent = `
+        css.textContent = this.#style + style + `
             :host, * { margin: 0; padding: 0; box-sizing: border-box; }
             :host { outline: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.32); backdrop-filter: blur(0.5rem); overflow: hidden; border: none; z-index: 999999999; }
                 :host > aside { position: absolute; padding: 10px; background-color: #fff; color: #000; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
@@ -129,7 +129,7 @@ class Dialog {
                     :host > aside > footer > div:active { transform: scale(1) }
                     :host > aside > footer > section { flex: 1; position: relative; text-align: center; }
                     :host > aside > footer > section:not(:empty) { padding: 10px; }
-        ` + style + this.#style;
+        `;
         dialog.shadowRoot.append(css);
 
 
@@ -203,7 +203,7 @@ class Dialog {
 
         let key = this.show(content, {
             title,
-            style: `
+            style: style + `
                 :host > aside > footer > section { text-align: right; }
                     :host > aside > footer > section > button { position: relative; outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
                     :host > aside > footer > section > button:hover { color: royalblue; background-color: #eee; }
@@ -235,7 +235,7 @@ class Dialog {
                             transform: rotate(1turn);
                         }
                     }
-            ` + style,
+            `,
             persistent,
             onClose,
             onHelp
@@ -417,7 +417,7 @@ class Dialog {
         let key = this.show(content, {
             title,
             footer,
-            style: `
+            style: style + `
                 :host { pointer-events: none; background: transparent !important; backdrop-filter: none; z-index: 9999999999; }
                     :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
                     ${discreet ? ':host > aside { left: 100%; top: auto; bottom: 10px; transform: auto; }' : ''}
@@ -430,7 +430,7 @@ class Dialog {
                     @keyframes show { from { top: 0; transform: translate(-50%, -100%); } to { top: 10px; transform: translate(-50%, 0); } }
                     @keyframes hide { from { top: 10px; transform: translate(-50%, 0); } to { top: 0; transform: translate(-50%, -100%); } }
                 `}
-            ` + style,
+            `,
             script,
             persistent,
             onClose,
@@ -487,7 +487,7 @@ class Dialog {
         let key = this.show(content, {
             title,
             footer,
-            style: `
+            style: style + `
                 ${fullScreen ? `
                     :host > aside > header { flex-direction: row-reverse !important; }
                     :host > aside > header > span { transform: scaleX(-1); }
@@ -497,7 +497,7 @@ class Dialog {
                 `}
                 
                 :host > aside > header > span { outline: none; user-select: none; width: 40px; height: 40px; cursor: pointer; text-align: center; font-size: 18px; font-weight: bold; display: inline-flex; justify-content: center; align-items: center; }
-            ` + style,
+            `,
             script,
             persistent,
             fullScreen,
