@@ -73,7 +73,8 @@ class Dialog {
         script = () => {},
         persistent = false,
         fullScreen = false,
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined
     } = {}) {
 
         let key = crypto.randomUUID();
@@ -84,7 +85,9 @@ class Dialog {
             header: document.createElement('header'),
             title: document.createElement('h1'),
             main: document.createElement('main'),
+            help: document.createElement('div'),
             footer: document.createElement('footer'),
+            footerContent: document.createElement('section'),
             shadowRoot: null,
             keyDown: e => {
 
@@ -112,15 +115,20 @@ class Dialog {
                 :host > aside { position: absolute; padding: 10px; background-color: #fff; color: #000; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
                 ${fullScreen ? `
                     :host > aside { padding: 0; width: 100%; height: 100%; }
+                    :host > aside > footer > div { margin: 10px !important; }
                 ` : `
                     :host > aside { left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 20px); height: max-content; max-height: calc(100% - 20px); border-radius: 3px; }
                 `}
-                    :host > aside > header { position: relative; width: 100%; font-size: 18px; text-align: center; display: flex; flex-direction: row; align-items: center; /*border-bottom: 1px solid #eee;*/ z-index: 2; }
-                    :host > aside > header > h1 { display: inline-block; width: 100%; height: max-content; font-size: 20px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+                    :host > aside > header { position: relative; width: 100%; font-size: 18px; text-align: center; display: flex; align-items: center; z-index: 2; }
+                    :host > aside > header > h1 { flex: 1; display: inline-block; height: max-content; font-size: 20px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
                     :host > aside > header > h1:not(:empty) { padding: 5px 10px; }
                     :host > aside > main { flex: 1; position: relative; padding: 20px; width: 100%; overflow: auto; z-index: 1; }
-                    :host > aside > footer { position: relative; padding: 5px; width: 100%; text-align: center; /*border-bottom: 1px solid #eee;*/ z-index: 3; }
-                    :host > aside > footer:empty { padding: 0; }
+                    :host > aside > footer { position: relative; width: 100%; display: flex; align-items: center; z-index: 3; }
+                    :host > aside > footer > div { outline: none; user-select: none; position: relative; margin: 5px; width: 20px; height: 20px; cursor: pointer; text-align: center; font-size: 14px; color: #333; border: 1px solid #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+                    :host > aside > footer > div:hover { transform: scale(1.1) }
+                    :host > aside > footer > div:active { transform: scale(1) }
+                    :host > aside > footer > section { flex: 1; position: relative; text-align: center; }
+                    :host > aside > footer > section:not(:empty) { padding: 10px; }
         ` + style + this.#style;
         dialog.shadowRoot.append(css);
 
@@ -137,11 +145,11 @@ class Dialog {
 
         if (typeof footer == 'string') {
 
-            dialog.footer.innerHTML = footer;
+            dialog.footerContent.innerHTML = footer;
 
         } else {
 
-            dialog.footer.append(footer);
+            dialog.footerContent.append(footer);
 
         }
 
@@ -149,15 +157,22 @@ class Dialog {
         dialog.title.textContent = title;
         dialog.title.title = title;
 
+        dialog.help.textContent = '?';
+
         dialog.header.append(dialog.title);
         dialog.aside.append(dialog.header);
         dialog.aside.append(dialog.main);
         dialog.aside.append(dialog.footer);
+        if (onHelp) dialog.footer.append(dialog.help);
+        dialog.footer.append(dialog.footerContent);
         dialog.shadowRoot.append(dialog.aside);
         document.body.append(dialog.host);
 
 
-        script(dialog.main, dialog.footer);
+        script(dialog.main, dialog.footerContent);
+
+
+        dialog.help.onclick = onHelp;
 
 
         dialog.host.onclick = e => {
@@ -182,20 +197,21 @@ class Dialog {
         script = () => {},
         persistent = false,
         textResolve = 'Ok',
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined
     } = {}) {
 
         let key = this.show(content, {
-            title: title,
+            title,
             style: `
-                :host > aside > footer { text-align: right; }
-                    :host > aside > footer > button { position: relative; outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
-                    :host > aside > footer > button:hover { color: royalblue; background-color: #eee; }
-                    :host > aside > footer > button:focus { color: dodgerblue; }
-                    :host > aside > footer > button.disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
-                    :host > aside > footer > button.denied { background-color: #ffaaaa; }
-                    :host > aside > footer > button.waiting { color: rgba(255, 255, 255, 0); background-color: #eee; }
-                    :host > aside > footer > button.waiting::after {
+                :host > aside > footer > section { text-align: right; }
+                    :host > aside > footer > section > button { position: relative; outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
+                    :host > aside > footer > section > button:hover { color: royalblue; background-color: #eee; }
+                    :host > aside > footer > section > button:focus { color: dodgerblue; }
+                    :host > aside > footer > section > button.disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
+                    :host > aside > footer > section > button.denied { background-color: #ffaaaa; }
+                    :host > aside > footer > section > button.waiting { color: rgba(255, 255, 255, 0); background-color: #eee; }
+                    :host > aside > footer > section > button.waiting::after {
                         content: "";
                         position: absolute;
                         width: 16px;
@@ -220,8 +236,9 @@ class Dialog {
                         }
                     }
             ` + style,
-            persistent: persistent,
-            onClose: onClose
+            persistent,
+            onClose,
+            onHelp
         });
 
 
@@ -281,7 +298,7 @@ class Dialog {
         this.#list[key].host.onclick = null;
 
 
-        this.#list[key].footer.appendChild(this.#list[key].btnResolve).focus();
+        this.#list[key].footerContent.appendChild(this.#list[key].btnResolve).focus();
 
         return key;
 
@@ -294,16 +311,18 @@ class Dialog {
         persistent = false,
         textResolve = 'Ok',
         textReject = 'No',
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined
     } = {}) {
 
         let key = this.alert(content, callback, {
-            title: title,
-            style: style,
-            script: script,
-            persistent: persistent,
-            textResolve: textResolve,
-            onClose: onClose
+            title,
+            style,
+            script,
+            persistent,
+            textResolve,
+            onClose,
+            onHelp
         });
 
 
@@ -361,12 +380,12 @@ class Dialog {
 
             } else if (/(Enter|\s)/i.test(e.key) && !persistent) {
 
-                if (this.#list[key].footer.querySelector('button:focus') == this.#list[key].btnReject) {
+                if (this.#list[key].footerContent.querySelector('button:focus') == this.#list[key].btnReject) {
 
                     callback(false, this.#list[key].main);
                     this.close(key);
 
-                } else if (this.#list[key].footer.querySelector('button:focus') == this.#list[key].btnResolve) {
+                } else if (this.#list[key].footerContent.querySelector('button:focus') == this.#list[key].btnResolve) {
 
                     resolve();
 
@@ -377,7 +396,7 @@ class Dialog {
         };
 
 
-        this.#list[key].footer.insertBefore(this.#list[key].btnReject, this.#list[key].btnResolve);
+        this.#list[key].footerContent.insertBefore(this.#list[key].btnReject, this.#list[key].btnResolve);
 
         return key;
 
@@ -391,12 +410,13 @@ class Dialog {
         persistent = false,
         discreet = true,
         duration = null,
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined
     } = {}) {
 
         let key = this.show(content, {
-            title: title,
-            footer: footer,
+            title,
+            footer,
             style: `
                 :host { pointer-events: none; background: transparent !important; backdrop-filter: none; z-index: 9999999999; }
                     :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
@@ -411,9 +431,10 @@ class Dialog {
                     @keyframes hide { from { top: 10px; transform: translate(-50%, 0); } to { top: 0; transform: translate(-50%, -100%); } }
                 `}
             ` + style,
-            script: script,
-            persistent: persistent,
-            onClose: onClose
+            script,
+            persistent,
+            onClose,
+            onHelp
         });
 
 
@@ -459,12 +480,13 @@ class Dialog {
         script = () => {},
         persistent = false,
         fullScreen = false,
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined
     } = {}) {
 
         let key = this.show(content, {
-            title: title,
-            footer: footer,
+            title,
+            footer,
             style: `
                 ${fullScreen ? `
                     :host > aside > header { flex-direction: row-reverse !important; }
@@ -475,12 +497,12 @@ class Dialog {
                 `}
                 
                 :host > aside > header > span { outline: none; user-select: none; width: 40px; height: 40px; cursor: pointer; text-align: center; font-size: 18px; font-weight: bold; display: inline-flex; justify-content: center; align-items: center; }
-                :host > aside > header > h1 { width: calc(100% - 40px); }
             ` + style,
-            script: script,
-            persistent: persistent,
-            fullScreen: fullScreen,
-            onClose: onClose
+            script,
+            persistent,
+            fullScreen,
+            onClose,
+            onHelp
         });
 
         this.#list[key].btnClose = document.createElement('span');
@@ -557,10 +579,13 @@ class Dialog {
         this.#list[key].keyUp = null;
         this.#list[key].keyDown = null;
         this.#list[key].onClose = null;
+        this.#list[key].help.onclick = null;
 
         this.#list[key].title.remove();
         this.#list[key].header.remove();
         this.#list[key].main.remove();
+        this.#list[key].help.remove();
+        this.#list[key].footerContent.remove();
         this.#list[key].footer.remove();
         this.#list[key].aside.remove();
         this.#list[key].host.remove();

@@ -47,14 +47,16 @@ alert(
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape, Enter and Space
         textResolve = 'Ok',
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         style?: string,
         script?: (main: HTMLElement) => Promise<any> | void,
         persistent?: boolean,
         textResolve?: string,
-        onClose?: (key: string) => void
+        onClose?: (key: string) => void,
+        onHelp?: (event: MouseEvent) => void | undefined
     } = {}
 ): string
 
@@ -70,7 +72,8 @@ confirm(
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape, Enter and Space
         textResolve = 'Ok',
         textReject = 'No',
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         style?: string,
@@ -78,7 +81,8 @@ confirm(
         persistent?: boolean,
         textResolve?: string,
         textReject?: string,
-        onClose?: (key: string) => void
+        onClose?: (key: string) => void,
+        onHelp?: (event: MouseEvent) => void | undefined
     } = {}
 ): string
 
@@ -89,10 +93,11 @@ notify(
         footer = '',
         style = '',
         script = () => {},
-        persistent = false,
+        persistent = false, // If true, the dialog does not close on the press of the Escape
         discreet = true, // If true, the dialog will appear in the lower right corner, otherwise, in the upper central part
         duration = null, // If a time is not provided, it will be calculated based on the total number of characters, although the minimum time is 3000ms
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         footer?: string,
@@ -101,7 +106,8 @@ notify(
         persistent?: boolean,
         discreet?: boolean,
         duration?: number,
-        onClose?: (key: string) => void
+        onClose?: (key: string) => void,
+        onHelp?: (event: MouseEvent) => void | undefined
     } = {}
 ): string
 
@@ -114,7 +120,8 @@ popUp(
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape
         fullScreen = false, // If true, the dialog will fill the entire window and the close button will change
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         footer?: string,
@@ -122,7 +129,8 @@ popUp(
         script?: (main: HTMLElement, footer: HTMLElement) => void,
         persistent?: boolean,
         fullScreen?: boolean,
-        onClose?: (key: string) => void
+        onClose?: (key: string) => void,
+        onHelp?: (event: MouseEvent) => void | undefined
     } = {}
 ): string
 
@@ -135,7 +143,8 @@ show(
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape
         fullScreen = false, // If true, the dialog will fill the entire window
-        onClose = () => {}
+        onClose = () => {},
+        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         footer?: string,
@@ -143,7 +152,8 @@ show(
         script?: (main: HTMLElement, footer: HTMLElement) => void,
         persistent?: boolean,
         fullScreen?: boolean,
-        onClose?: (key: string) => void
+        onClose?: (key: string) => void,
+        onHelp?: (event: MouseEvent) => void | undefined
     } = {}
 ): string
 ```
