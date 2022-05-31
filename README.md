@@ -55,7 +55,7 @@ alert(
     } = {}
 ): string
 
-close(key?: (string | null) = null): boolean // If a key is not inserted, the most recent dialog will be removed from the stacks
+close(key?: (string | null) = null): string // If a key is not inserted, the most recent dialog will be removed from the stacks
 
 confirm(
     content: string | HTMLElement,

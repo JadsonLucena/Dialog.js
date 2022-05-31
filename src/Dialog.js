@@ -833,38 +833,34 @@ class Dialog {
         this.#list[key].host.remove();
 
 
-        let res = delete this.#list[key];
+        delete this.#list[key];
 
 
-        if (res) {
+        let keys = Object.keys(this.#list);
+        if (keys.length) {
 
-            let keys = Object.keys(this.#list);
-            if (keys.length) {
+            let lastKey = keys.at(-1);
 
-                let lastKey = keys.at(-1);
+            if ( 'duration' in this.#list[lastKey] && !this.#list[lastKey].hide && !this.#list[lastKey].close) {
 
-                if ( 'duration' in this.#list[lastKey] && !this.#list[lastKey].hide && !this.#list[lastKey].close) {
+                // unfreeze the most recent notification
+                this.#list[lastKey].hide = setTimeout(() => this.#list[lastKey].host.classList.add('hide'), this.#list[lastKey].duration - 1000);
+                this.#list[lastKey].close = setTimeout(() => this.close(lastKey), this.#list[lastKey].duration);
 
-                    // unfreeze the most recent notification
-                    this.#list[lastKey].hide = setTimeout(() => this.#list[lastKey].host.classList.add('hide'), this.#list[lastKey].duration - 1000);
-                    this.#list[lastKey].close = setTimeout(() => this.close(lastKey), this.#list[lastKey].duration);
+            } else if (this.#list[lastKey].btnResolve) {
 
-                } else if (this.#list[lastKey].btnResolve) {
+                this.#list[lastKey].btnResolve.focus();
 
-                    this.#list[lastKey].btnResolve.focus();
+            } else if (this.#list[lastKey].btnClose) {
 
-                } else if (this.#list[lastKey].btnClose) {
-
-                    this.#list[lastKey].btnClose.focus();
-
-                }
+                this.#list[lastKey].btnClose.focus();
 
             }
 
         }
 
 
-        return res;
+        return key;
 
     }
 
