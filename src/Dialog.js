@@ -51,7 +51,7 @@ class Dialog {
 
             if (keys.length) {
 
-                this.#list[keys.pop()].keyDown(e);
+                this.#list[keys.at(-1)].keyDown(e);
 
             }
 
@@ -63,7 +63,7 @@ class Dialog {
 
             if (keys.length) {
 
-                this.#list[keys.pop()].keyUp(e);
+                this.#list[keys.at(-1)].keyUp(e);
 
             }
 
@@ -270,7 +270,24 @@ class Dialog {
         };
 
 
+        // freeze old notifications
+        for (let key of Object.keys(this.#list)) {
+
+            if ('duration' in this.#list[key]) {
+
+                clearTimeout(this.#list[key].hide);
+                clearTimeout(this.#list[key].close);
+
+                this.#list[key].hide = null;
+                this.#list[key].close = null;
+
+            }
+
+        }
+
+
         this.#list[key] = dialog;
+
 
         return key;
 
@@ -489,11 +506,11 @@ class Dialog {
             title,
             footer,
             style: style + `
-                :host { pointer-events: none; background: transparent !important; backdrop-filter: none; z-index: 9999999999; }
+                :host { pointer-events: none; background: transparent !important; backdrop-filter: none !important; }
                     :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
                     ${discreet ? `
-                        :host > aside { left: 100%; top: auto; bottom: 10px; transform: auto; }
-                    ` : ''}
+                        :host > aside { left: 100%; top: initial !important; bottom: 10px; transform: auto; }
+                    ` : ``}
                     :host(.hide) aside { animation: hide 1s forwards; }
 
                 ${discreet ? `
@@ -511,11 +528,11 @@ class Dialog {
         });
 
 
-        duration = Math.max(3000, duration == null ? (title +''+ content +''+ footer).replace(/(\s|<\/?[a-z-]+>)/ig, '').length * 55 : duration);
+        this.#list[key].duration = Math.max(3000, duration == null ? (title +''+ content +''+ footer).replace(/(\s|<\/?[a-z-]+>)/ig, '').length * 150 : duration);
 
 
-        let hide = setTimeout(() => this.#list[key].host.classList.add('hide'), duration - 1000);
-        let close = setTimeout(() => this.close(key), duration);
+        this.#list[key].hide = setTimeout(() => this.#list[key].host.classList.add('hide'), this.#list[key].duration - 1000);
+        this.#list[key].close = setTimeout(() => this.close(key), this.#list[key].duration);
 
 
         this.#list[key].host.onclick = null;
@@ -523,8 +540,11 @@ class Dialog {
 
             if (e.key == 'Escape' && !persistent) {
 
-                clearTimeout(hide);
-                clearTimeout(close);
+                clearTimeout(this.#list[key].hide);
+                clearTimeout(this.#list[key].close);
+
+                this.#list[key].hide = null;
+                this.#list[key].close = null;
 
                 if (!this.#list[key].host.classList.contains('hide')) {
 
@@ -537,9 +557,6 @@ class Dialog {
             }
 
         };
-
-
-        this.#list[key].host.onclick = null;
 
 
         return key;
@@ -601,7 +618,7 @@ class Dialog {
 
             if (keys.length) {
 
-                key = keys.pop();
+                key = keys.at(-1);
 
             } else {
 
@@ -673,7 +690,31 @@ class Dialog {
         this.#list[key].aside.remove();
         this.#list[key].host.remove();
 
-        return delete this.#list[key];
+        
+        let res = delete this.#list[key];
+
+
+        if (res) {
+
+            // unfreeze the most recent notification
+            let keys = Object.keys(this.#list);
+            if (keys.length) {
+
+                let lastKey = keys.at(-1);
+
+                if ( 'duration' in this.#list[lastKey] && !this.#list[lastKey].hide && !this.#list[lastKey].close) {
+
+                    this.#list[lastKey].hide = setTimeout(() => this.#list[lastKey].host.classList.add('hide'), this.#list[lastKey].duration - 1000);
+                    this.#list[lastKey].close = setTimeout(() => this.close(lastKey), this.#list[lastKey].duration);
+
+                }
+
+            }
+
+        }
+
+
+        return res;
 
     }
 
