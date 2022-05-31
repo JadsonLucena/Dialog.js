@@ -55,7 +55,7 @@ alert(
     } = {}
 ): string
 
-close(key?: (string | null) = null): boolean | null // If a key is not inserted, the most recent dialog will be removed from the stacks
+close(key?: (string | null) = null): boolean // If a key is not inserted, the most recent dialog will be removed from the stacks
 
 confirm(
     content: string | HTMLElement,
@@ -91,7 +91,7 @@ notify(
         script = () => {},
         persistent = false, // If true, the dialog does not close on the press of the Escape
         discreet = true, // If true, the dialog will appear in the lower right corner, otherwise, in the upper central part
-        duration = null, // If a time is not provided, it will be calculated based on the total number of characters, although the minimum time is 3000ms
+        duration = 0, // If the given time is less than 3000ms, it will be calculated based on the total number of characters, although the minimum time is 3000ms
         onClose = () => {},
         onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
@@ -162,5 +162,4 @@ show(
 ## QuickStart
 [![Edit Dialog.js](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/dialog-js-ewfgew?autoresize=1&expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark)
 
-> Every method returns the key for the modal created\
-> If the close method returns null, then the dialog was not found
+> Every method returns the key for the modal created

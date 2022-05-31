@@ -19,8 +19,8 @@ class Dialog {
         delegatesFocus = false,
     } = {}) {
 
-        this.#shadowRootMode = shadowRootMode;
-        this.#delegatesFocus = delegatesFocus;
+        this.shadowRootMode = shadowRootMode;
+        this.delegatesFocus = delegatesFocus;
 
         this.#list = {};
 
@@ -88,8 +88,25 @@ class Dialog {
     get delegatesFocus() { return this.#delegatesFocus; }
 
 
-    set shadowRootMode(shadowRootMode = 'open') { this.#shadowRootMode = shadowRootMode; }
-    set delegatesFocus(delegatesFocus = false) { this.#delegatesFocus = delegatesFocus; }
+    set shadowRootMode(mode = 'open') {
+
+        document.createElement('div').attachShadow({
+            mode
+        });
+
+        this.#shadowRootMode = mode;
+
+    }
+    set delegatesFocus(delegatesFocus = false) {
+
+        document.createElement('div').attachShadow({
+            mode: 'open',
+            delegatesFocus
+        });
+
+        this.#delegatesFocus = delegatesFocus;
+
+    }
 
 
     show(content, {
@@ -103,6 +120,45 @@ class Dialog {
         onClose = () => {},
         onHelp = undefined
     } = {}) {
+
+        if (typeof content != 'string' && !(content instanceof HTMLElement)) {
+
+            throw new TypeError('Unsupported content');
+
+        } else if (title && typeof title != 'string') {
+
+            throw new TypeError('Unsupported title');
+
+        } else if (footer && typeof footer != 'string' && !(footer instanceof HTMLElement)) {
+
+            throw new TypeError('Unsupported footer');
+
+        } else if (mainStyle && typeof mainStyle != 'string') {
+
+            throw new TypeError('Unsupported mainStyle');
+
+        } else if (footerStyle && typeof footerStyle != 'string') {
+
+            throw new TypeError('Unsupported footerStyle');
+
+        } else if (target && !(target instanceof HTMLElement)) {
+
+            throw new TypeError('Unsupported target');
+
+        } else if (script && !(script instanceof Function)) {
+
+            throw new TypeError('Unsupported script');
+
+        } else if (onClose && !(onClose instanceof Function)) {
+
+            throw new TypeError('Unsupported onClose');
+
+        } else if (onHelp && !(onHelp instanceof Function)) {
+
+            throw new TypeError('Unsupported onHelp');
+
+        }
+
 
         let key = crypto.randomUUID();
 
@@ -327,6 +383,13 @@ class Dialog {
         onHelp = undefined
     } = {}) {
 
+        if (typeof textResolve != 'string' || !textResolve.trim()) {
+
+            throw new TypeError('Unsupported textResolve');
+
+        }
+
+
         let key = this.show(content, {
             title,
             mainStyle,
@@ -436,6 +499,13 @@ class Dialog {
         onHelp = undefined
     } = {}) {
 
+        if (typeof textReject != 'string' || !textReject.trim()) {
+
+            throw new TypeError('Unsupported textReject');
+
+        }
+
+
         let key = this.alert(content, callback, {
             title,
             mainStyle,
@@ -531,10 +601,17 @@ class Dialog {
         script = () => {},
         persistent = false,
         discreet = true,
-        duration = null,
+        duration = 0,
         onClose = () => {},
         onHelp = undefined
     } = {}) {
+
+        if (typeof duration != 'number') {
+
+            throw new TypeError('Unsupported duration');
+
+        }
+
 
         let key = this.show(content, {
             title,
@@ -548,7 +625,7 @@ class Dialog {
         });
 
 
-        this.#list[key].duration = Math.max(3000, duration == null ? (title +''+ content +''+ footer).replace(/(\s|<\/?[a-z-]+>)/ig, '').length * 150 : duration);
+        this.#list[key].duration = Math.max(3000, duration < 3000 ? (title +''+ content +''+ footer).replace(/(\s|<\/?[a-z-]+>)/ig, '').length * 150 : duration);
 
 
         this.#list[key].hide = setTimeout(() => this.#list[key].host.classList.add('hide'), this.#list[key].duration - 1000);
@@ -675,8 +752,7 @@ class Dialog {
 
             } else {
 
-                // throw 'Does not exist';
-                return null;
+                throw new RangeError('Empty Stack');
 
             }
 
@@ -684,8 +760,7 @@ class Dialog {
 
             if (!(key in this.#list)) {
 
-                // throw 'Is not declared';
-                return null;
+                throw new ReferenceError('Not Found');
 
             }
 
