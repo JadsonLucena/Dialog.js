@@ -12,7 +12,6 @@ It is a responsive and cross-browser dialog system that facilitates the creation
 Dialog(
     shadowRootMode?: ('open' | 'closed') = 'open', // A string specifying the encapsulation mode for the shadow DOM tree
     delegatesFocus?: boolean = false, // When a non-focusable part of the shadow DOM is clicked, the first focusable part is given focus
-    style?: string = ''
 )
 ```
 
@@ -23,8 +22,6 @@ list(): string[] // List reverted of created dialog ID's
 shadowRootMode(): 'open' | 'closed'
 
 delegatesFocus(): boolean
-
-style(): string
 ```
 
 ```javascript
@@ -32,8 +29,6 @@ style(): string
 shadowRootMode(arg?: ('open' | 'closed') = 'open'): void
 
 delegatesFocus(arg?: boolean = false): viod
-
-style(arg?: string = ''): viod
 ```
 
 ```javascript
@@ -43,7 +38,7 @@ alert(
     callback: (flag: boolean, main: HTMLElement) => boolean | Promise<any> | void,
     {
         title = '',
-        style = '',
+        mainStyle = '',
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape, Enter and Space
         textResolve = 'Ok',
@@ -51,7 +46,7 @@ alert(
         onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
-        style?: string,
+        mainStyle?: string,
         script?: (main: HTMLElement) => Promise<any> | void,
         persistent?: boolean,
         textResolve?: string,
@@ -67,7 +62,7 @@ confirm(
     callback: (flag: boolean, main: HTMLElement) => boolean | Promise<any> | void,
     {
         title = '',
-        style = '',
+        mainStyle = '',
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape, Enter and Space
         textResolve = 'Ok',
@@ -76,7 +71,7 @@ confirm(
         onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
-        style?: string,
+        mainStyle?: string,
         script?: (main: HTMLElement) => Promise<any> | void,
         persistent?: boolean,
         textResolve?: string,
@@ -91,7 +86,8 @@ notify(
     {
         title = '',
         footer = '',
-        style = '',
+        mainStyle = '',
+        footerStyle = '',
         script = () => {},
         persistent = false, // If true, the dialog does not close on the press of the Escape
         discreet = true, // If true, the dialog will appear in the lower right corner, otherwise, in the upper central part
@@ -101,7 +97,8 @@ notify(
     }: {
         title?: string,
         footer?: string,
-        style?: string,
+        mainStyle?: string,
+        footerStyle?: string,
         script?: (main: HTMLElement, footer: HTMLElement) => void,
         persistent?: boolean,
         discreet?: boolean,
@@ -116,7 +113,8 @@ popUp(
     {
         title = '',
         footer = '',
-        style = '',
+        mainStyle = '',
+        footerStyle = '',
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape
         fullScreen = false, // If true, the dialog will fill the entire window and the close button will change
@@ -125,7 +123,8 @@ popUp(
     }: {
         title?: string,
         footer?: string,
-        style?: string,
+        mainStyle?: string,
+        footerStyle?: string,
         script?: (main: HTMLElement, footer: HTMLElement) => void,
         persistent?: boolean,
         fullScreen?: boolean,
@@ -139,7 +138,8 @@ show(
     {
         title = '',
         footer = '',
-        style = '',
+        mainStyle = '',
+        footerStyle = '',
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape
         fullScreen = false, // If true, the dialog will fill the entire window
@@ -148,7 +148,8 @@ show(
     }: {
         title?: string,
         footer?: string,
-        style?: string,
+        mainStyle?: string,
+        footerStyle?: string,
         script?: (main: HTMLElement, footer: HTMLElement) => void,
         persistent?: boolean,
         fullScreen?: boolean,

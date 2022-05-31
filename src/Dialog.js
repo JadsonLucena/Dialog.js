@@ -11,19 +11,16 @@ class Dialog {
 
     #shadowRootMode;
     #delegatesFocus;
-    #style;
 
     #list;
 
     constructor({
         shadowRootMode = 'open',
         delegatesFocus = false,
-        style = ''
     } = {}) {
 
         this.#shadowRootMode = shadowRootMode;
         this.#delegatesFocus = delegatesFocus;
-        this.#style = style;
 
         this.#list = {};
 
@@ -89,18 +86,17 @@ class Dialog {
     get list() { return Object.keys(this.#list).reverse(); }
     get shadowRootMode() { return this.#shadowRootMode; }
     get delegatesFocus() { return this.#delegatesFocus; }
-    get style() { return this.#style; }
 
 
     set shadowRootMode(shadowRootMode = 'open') { this.#shadowRootMode = shadowRootMode; }
     set delegatesFocus(delegatesFocus = false) { this.#delegatesFocus = delegatesFocus; }
-    set style(style = '') { this.#style = style; }
 
 
     show(content, {
         title = '',
         footer = '',
-        style = '',
+        mainStyle = '',
+        footerStyle = '',
         target = null,
         script = () => {},
         persistent = false,
@@ -113,16 +109,18 @@ class Dialog {
 
         let dialog = {
             host: document.createElement('custom-dialog'),
+            shadowRoot: null,
             aside: document.createElement('aside'),
             header: document.createElement('header'),
             title: document.createElement('h1'),
             main: document.createElement('main'),
+            shadowMain: null,
             footer: document.createElement('footer'),
             help: document.createElement('div'),
             footerContent: document.createElement('section'),
+            shadowFooter: document.createElement('section'),
             target,
-            persistent,
-            shadowRoot: null,
+            persistent,           
             keyUp: () => {},
             onClose: onClose
         };
@@ -131,6 +129,14 @@ class Dialog {
             mode: this.#shadowRootMode, // open | close
             delegatesFocus: this.#delegatesFocus
         });
+        dialog.shadowMain = dialog.main.attachShadow({
+            mode: 'open'
+        });
+        dialog.shadowFooter = dialog.footerContent.attachShadow({
+            mode: 'open'
+        });
+
+
         dialog.keyDown = e => {
 
             if (e.key == 'Escape' && !persistent) {
@@ -152,7 +158,7 @@ class Dialog {
 
 
         let css = document.createElement('style');
-        css.textContent = this.#style + style + `
+        css.textContent = `
             :host, * { margin: 0; padding: 0; box-sizing: border-box; }
             :host { outline: none; border: none; z-index: 999999999; }
             :host > aside { padding: 10px; width: max-content;  height: max-content; background-color: #fff; color: #000; border-radius: 3px; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
@@ -177,23 +183,41 @@ class Dialog {
         dialog.shadowRoot.append(css);
 
 
-        if (typeof content == 'string') {
+        if (typeof content == 'string' && content.trim()) {
 
-            dialog.main.innerHTML = content;
+            dialog.shadowMain.innerHTML = `
+                <style>
+                ${mainStyle}
+                </style>
+                ${content}
+            `;
 
-        } else {
+        } else if (content instanceof HTMLElement) {
 
-            dialog.main.append(content);
+            let css = document.createElement('style');
+            css.textContent = mainStyle;
+            dialog.shadowMain.append(css);
+
+            dialog.shadowMain.append(content);
 
         }
 
-        if (typeof footer == 'string') {
+        if (typeof footer == 'string' && footer.trim()) {
 
-            dialog.footerContent.innerHTML = footer;
+            dialog.shadowFooter.innerHTML = `
+                <style>
+                ${footerStyle}
+                </style>
+                ${footer}
+            `;
 
-        } else {
+        } else if (footer instanceof HTMLElement) {
 
-            dialog.footerContent.append(footer);
+            let css = document.createElement('style');
+            css.textContent = footerStyle;
+            dialog.shadowFooter.append(css);
+
+            dialog.shadowFooter.append(footer);
 
         }
 
@@ -253,7 +277,7 @@ class Dialog {
         }
 
 
-        script(dialog.main, dialog.footerContent);
+        script(dialog.shadowMain, dialog.shadowFooter);
 
 
         dialog.help.onclick = onHelp;
@@ -295,7 +319,7 @@ class Dialog {
 
     alert(content, callback = () => {}, {
         title = '',
-        style = '',
+        mainStyle = '',
         script = () => {},
         persistent = false,
         textResolve = 'Ok',
@@ -305,29 +329,34 @@ class Dialog {
 
         let key = this.show(content, {
             title,
-            style: style + `
-                :host > aside > footer > section { text-align: right; }
-                    :host > aside > footer > section > button { position: relative; outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
-                    :host > aside > footer > section > button:hover { color: royalblue; background-color: #eee; }
-                    :host > aside > footer > section > button:focus { color: dodgerblue; }
-                    :host > aside > footer > section > button.disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
-                    :host > aside > footer > section > button.denied { background-color: #ffaaaa; }
-                    :host > aside > footer > section > button.waiting { color: rgba(255, 255, 255, 0); background-color: #eee; }
-                    :host > aside > footer > section > button.waiting::after { content: ""; position: absolute; width: 16px; height: 16px; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 4px solid transparent; border-top-color: #ffffff; border-radius: 50%; animation: button-loading-spinner 1s ease infinite; }
-                    @keyframes button-loading-spinner {
-                        from {
-                            transform: rotate(0turn);
-                        }
-                        
-                        to {
-                            transform: rotate(1turn);
-                        }
-                    }
-            `,
+            mainStyle,
             persistent,
             onClose,
             onHelp
         });
+
+
+        let css = document.createElement('style');
+        css.textContent = `
+            :host { padding-top: 10px !important; text-align: right !important; }
+                :host > button { position: relative; outline: none; user-select: none; margin-left: 10px; padding: 10px 20px; cursor: pointer; border: none; background-color: #fff; border-radius: 3px; }
+                :host > button:hover { color: royalblue; background-color: #eee; }
+                :host > button:focus { color: dodgerblue; }
+                :host > button.disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
+                :host > button.denied { background-color: #ffaaaa; }
+                :host > button.waiting { color: rgba(255, 255, 255, 0); background-color: #eee; }
+                :host > button.waiting::after { content: ""; position: absolute; width: 16px; height: 16px; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 4px solid transparent; border-top-color: #ffffff; border-radius: 50%; animation: button-loading-spinner 1s ease infinite; }
+                @keyframes button-loading-spinner {
+                    from {
+                        transform: rotate(0turn);
+                    }
+                    
+                    to {
+                        transform: rotate(1turn);
+                    }
+                }
+        `;
+        this.#list[key].shadowFooter.append(css);
 
 
         this.#list[key].btnResolve = document.createElement('button');
@@ -335,14 +364,14 @@ class Dialog {
         this.#list[key].btnResolve.classList.add('disabled');
 
 
-        Promise.all([script(this.#list[key].main)]).finally(() => this.#list[key].btnResolve.classList.remove('disabled'));
+        Promise.all([script(this.#list[key].shadowMain)]).finally(() => this.#list[key].btnResolve.classList.remove('disabled'));
 
 
         let resolve = () => {
 
             this.#list[key].btnResolve.classList.add('waiting');
 
-            Promise.all([callback(true, this.#list[key].main)]).then(e => {
+            Promise.all([callback(true, this.#list[key].shadowMain)]).then(e => {
 
                 this.#list[key].btnResolve.classList.remove('waiting');
 
@@ -386,7 +415,11 @@ class Dialog {
         this.#list[key].host.onclick = null;
 
 
-        this.#list[key].footerContent.appendChild(this.#list[key].btnResolve).focus();
+        this.#list[key].shadowFooter.append(this.#list[key].btnResolve);
+
+
+        setTimeout(() => this.#list[key].btnResolve.focus(), 1);
+
 
         return key;
 
@@ -394,7 +427,7 @@ class Dialog {
 
     confirm(content, callback = () => {}, {
         title = '',
-        style = '',
+        mainStyle = '',
         script = () => {},
         persistent = false,
         textResolve = 'Ok',
@@ -405,7 +438,7 @@ class Dialog {
 
         let key = this.alert(content, callback, {
             title,
-            style,
+            mainStyle,
             script,
             persistent,
             textResolve,
@@ -423,7 +456,7 @@ class Dialog {
             this.#list[key].btnResolve.classList.add('waiting');
             this.#list[key].btnReject.classList.add('disabled');
 
-            Promise.all([callback(true, this.#list[key].main)]).then(e => {
+            Promise.all([callback(true, this.#list[key].shadowMain)]).then(e => {
 
                 this.#list[key].btnResolve.classList.remove('waiting');
                 this.#list[key].btnReject.classList.remove('disabled');
@@ -453,7 +486,7 @@ class Dialog {
         this.#list[key].btnResolve.onmouseup = () => this.#list[key].btnResolve.classList.remove('denied');
         this.#list[key].btnReject.onclick = () => {
 
-            callback(false, this.#list[key].main);
+            callback(false, this.#list[key].shadowMain);
             this.close(key);
 
         };
@@ -463,17 +496,17 @@ class Dialog {
 
             if (e.key == 'Escape' && !persistent) {
 
-                callback(false, this.#list[key].main);
+                callback(false, this.#list[key].shadowMain);
                 this.close(key);
 
             } else if (/(Enter|\s)/i.test(e.key) && !persistent) {
 
-                if (this.#list[key].footerContent.querySelector('button:focus') == this.#list[key].btnReject) {
+                if (this.#list[key].shadowFooter.querySelector('button:focus') == this.#list[key].btnReject) {
 
-                    callback(false, this.#list[key].main);
+                    callback(false, this.#list[key].shadowMain);
                     this.close(key);
 
-                } else if (this.#list[key].footerContent.querySelector('button:focus') == this.#list[key].btnResolve) {
+                } else if (this.#list[key].shadowFooter.querySelector('button:focus') == this.#list[key].btnResolve) {
 
                     resolve();
 
@@ -484,7 +517,7 @@ class Dialog {
         };
 
 
-        this.#list[key].footerContent.insertBefore(this.#list[key].btnReject, this.#list[key].btnResolve);
+        this.#list[key].shadowFooter.prepend(this.#list[key].btnReject);
 
         return key;
 
@@ -493,7 +526,8 @@ class Dialog {
     notify(content, {
         title = '',
         footer = '',
-        style = '',
+        mainStyle = '',
+        footerStyle = '',
         script = () => {},
         persistent = false,
         discreet = true,
@@ -505,22 +539,8 @@ class Dialog {
         let key = this.show(content, {
             title,
             footer,
-            style: style + `
-                :host { pointer-events: none; background: transparent !important; backdrop-filter: none !important; }
-                    :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
-                    ${discreet ? `
-                        :host > aside { left: 100%; top: initial !important; bottom: 10px; transform: auto; }
-                    ` : ``}
-                    :host(.hide) aside { animation: hide 1s forwards; }
-
-                ${discreet ? `
-                    @keyframes show { from { left: 100%; transform: translateX(0); } to { left: calc(100% - 10px); transform: translateX(-100%); } }
-                    @keyframes hide { from { left: calc(100% - 10px); transform: translateX(-100%); } to { left: 100%; transform: translateX(0); } }
-                ` : `
-                    @keyframes show { from { top: 0; transform: translate(-50%, -100%); } to { top: 10px; transform: translate(-50%, 0); } }
-                    @keyframes hide { from { top: 10px; transform: translate(-50%, 0); } to { top: 0; transform: translate(-50%, -100%); } }
-                `}
-            `,
+            mainStyle,
+            footerStyle,
             script,
             persistent,
             onClose,
@@ -533,6 +553,26 @@ class Dialog {
 
         this.#list[key].hide = setTimeout(() => this.#list[key].host.classList.add('hide'), this.#list[key].duration - 1000);
         this.#list[key].close = setTimeout(() => this.close(key), this.#list[key].duration);
+
+
+        let css = document.createElement('style');
+        css.textContent = `
+            :host { pointer-events: none; background: transparent !important; backdrop-filter: none !important; }
+                :host > aside { pointer-events: auto; text-align: center; animation: show 1s forwards; }
+                ${discreet ? `
+                    :host > aside { left: 100%; top: initial !important; bottom: 10px; transform: initial; }
+                ` : ``}
+                :host(.hide) aside { animation: hide 1s forwards; }
+
+            ${discreet ? `
+                @keyframes show { from { left: 100%; transform: translateX(0); } to { left: calc(100% - 10px); transform: translateX(-100%); } }
+                @keyframes hide { from { left: calc(100% - 10px); transform: translateX(-100%); } to { left: 100%; transform: translateX(0); } }
+            ` : `
+                @keyframes show { from { top: 0; transform: translate(-50%, -100%); } to { top: 10px; transform: translate(-50%, 0); } }
+                @keyframes hide { from { top: 10px; transform: translate(-50%, 0); } to { top: 0; transform: translate(-50%, -100%); } }
+            `}
+        `;
+        this.#list[key].shadowRoot.append(css);
 
 
         this.#list[key].host.onclick = null;
@@ -566,7 +606,8 @@ class Dialog {
     popUp(content, {
         title = '',
         footer = '',
-        style = '',
+        mainStyle = '',
+        footerStyle = '',
         script = () => {},
         persistent = false,
         fullScreen = false,
@@ -577,26 +618,33 @@ class Dialog {
         let key = this.show(content, {
             title,
             footer,
-            style: style + `
-                ${fullScreen ? `
-                    :host > aside { padding: 0 !important; left: 0 !important; top: 0 !important; transform: none !important; width: 100% !important; max-width: initial !important; height: 100% !important; max-height: initial !important; border-radius: initial !important; }
-                    :host > aside > header { flex-direction: row-reverse !important; }
-                    :host > aside > header > span { transform: scaleX(-1); }
-                    :host > aside > header > span:hover { transform: scaleX(-1) scale(1.1) }
-                    :host > aside > footer > div { margin: 10px !important; }
-                ` : `
-                    :host > aside > header > span:hover { transform: scale(1.1) }
-                `}
-                
-                :host > aside > header > span { outline: none; user-select: none; width: 40px; height: 40px; cursor: pointer; text-align: center; font-size: 18px; font-weight: bold; display: inline-flex; justify-content: center; align-items: center; }
-            `,
+            mainStyle,
+            footerStyle,
             script,
             persistent,
             onClose,
             onHelp
         });
 
-        this.#list[key].btnClose = document.createElement('span');
+
+        let css = document.createElement('style');
+        css.textContent = `
+            ${fullScreen ? `
+                :host > aside { padding: 0 !important; left: 0 !important; top: 0 !important; transform: none !important; width: 100% !important; max-width: initial !important; height: 100% !important; max-height: initial !important; border-radius: initial !important; }
+                :host > aside > header { flex-direction: row-reverse !important; }
+                :host > aside > header > button { transform: scaleX(-1); }
+                :host > aside > header > button:hover { transform: scaleX(-1) scale(1.1) }
+                :host > aside > footer > div { margin: 10px !important; }
+            ` : `
+                :host > aside > header > button:hover { transform: scale(1.1) }
+            `}
+            
+            :host > aside > header > button { outline: none; user-select: none; width: 40px; height: 40px; cursor: pointer; text-align: center; font-size: 18px; font-weight: bold; background: transparent; border: none; display: inline-flex; justify-content: center; align-items: center; }
+        `;
+        this.#list[key].shadowRoot.append(css);
+
+
+        this.#list[key].btnClose = document.createElement('button');
         this.#list[key].btnClose.textContent = fullScreen ? '➜' : '✕';
         this.#list[key].btnClose.onclick = () => {
 
@@ -604,7 +652,12 @@ class Dialog {
 
         };
 
+
         this.#list[key].header.append(this.#list[key].btnClose);
+
+
+        setTimeout(() => this.#list[key].btnClose.focus(), 1);
+
 
         return key;
 
@@ -673,9 +726,23 @@ class Dialog {
 
         }
 
+        if ('hide' in this.#list[key]) {
+
+            clearTimeout(this.#list[key].hide);
+
+        }
+
+        if ('close' in this.#list[key]) {
+
+            clearTimeout(this.#list[key].close);
+
+        }
+
 
         this.#list[key].host.onclick = null;
         this.#list[key].shadowRoot = null;
+        this.#list[key].shadowMain = null;
+        this.#list[key].shadowFooter = null;
         this.#list[key].keyUp = null;
         this.#list[key].keyDown = null;
         this.#list[key].onClose = null;
@@ -690,13 +757,12 @@ class Dialog {
         this.#list[key].aside.remove();
         this.#list[key].host.remove();
 
-        
+
         let res = delete this.#list[key];
 
 
         if (res) {
 
-            // unfreeze the most recent notification
             let keys = Object.keys(this.#list);
             if (keys.length) {
 
@@ -704,8 +770,17 @@ class Dialog {
 
                 if ( 'duration' in this.#list[lastKey] && !this.#list[lastKey].hide && !this.#list[lastKey].close) {
 
+                    // unfreeze the most recent notification
                     this.#list[lastKey].hide = setTimeout(() => this.#list[lastKey].host.classList.add('hide'), this.#list[lastKey].duration - 1000);
                     this.#list[lastKey].close = setTimeout(() => this.close(lastKey), this.#list[lastKey].duration);
+
+                } else if (this.#list[lastKey].btnResolve) {
+
+                    this.#list[lastKey].btnResolve.focus();
+
+                } else if (this.#list[lastKey].btnClose) {
+
+                    this.#list[lastKey].btnClose.focus();
 
                 }
 
