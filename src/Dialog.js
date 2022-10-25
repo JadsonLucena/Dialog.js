@@ -114,11 +114,11 @@ class Dialog {
         footer = '',
         mainStyle = '',
         footerStyle = '',
-        target = null,
+        target,
         script = () => {},
         persistent = false,
         onClose = () => {},
-        onHelp = undefined
+        onHelp
     } = {}) {
 
         if (typeof content != 'string' && !(content instanceof HTMLElement)) {
@@ -219,7 +219,7 @@ class Dialog {
             :host { outline: none; border: none; z-index: 999999999; }
             :host > aside { padding: 10px; width: max-content;  height: max-content; background-color: #fff; color: #000; border-radius: 3px; transition: 0.3s; box-shadow: 0 2px 8px rgba(0, 0, 0, .33); display: flex; flex-direction: column; }
             ${target ? `
-                :host { display: none; pointer-events: none; position: absolute; width: max-content; height: max-content; background: transparent; }
+                :host { display: none; pointer-events: none; position: absolute; width: max-content; max-width: calc(100vw - 20px); height: max-content; background: transparent; }
                 :host > aside { pointer-events: auto; max-width: inherit; max-height: inherit; }
             ` : `
                 :host { position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.32); backdrop-filter: blur(0.5rem); }
@@ -290,34 +290,99 @@ class Dialog {
         if (onHelp) dialog.footer.append(dialog.help);
         dialog.footer.append(dialog.footerContent);
         dialog.shadowRoot.append(dialog.aside);
-        document.body.append(dialog.host);
+
+        if (target) {
+
+            target.append(dialog.host);
+
+        } else {
+
+            document.body.append(dialog.host);
+
+        }
 
 
         if (target) {
 
             dialog.position = e => {
 
-                let scrollLeft = window.scrollX || document.body.scrollLeft;
-                let scrollTop = window.scrollY || document.body.scrollTop;
+                let boundBox = e.composedPath().find(box => ['auto', 'hidden', 'inherit', 'overlay', 'scroll'].includes(window.getComputedStyle(box).overflow) || box.tagName == 'BODY');
 
-                let vl = target.offsetLeft - scrollLeft;
-                let vt = target.offsetTop - scrollTop;                
+                if (target == boundBox) {
 
-                dialog.host.style = `
-                    display: initial;
-                    ${(vl <= window.innerWidth / 2) ? `left: `+ (target.offsetLeft + target.clientWidth) : `right: `+ (document.body.clientWidth - target.offsetLeft)}px;
-                    ${(vt <= window.innerHeight / 2) ? `top: `+ (target.offsetTop + target.clientHeight) : `bottom: `+ (document.body.clientHeight - target.offsetTop)}px;
-                    max-width: calc(100vw - ${(vl > window.innerWidth / 2) ? window.innerWidth - vl : vl + target.clientWidth}px);
-                    max-height: calc(100vh - ${(vt > window.innerHeight / 2) ? window.innerHeight - vt : vt + target.clientHeight}px);
-                `;
+                    dialog.host.style = `
+                        display: initial;
+                        left: ${Math.round(target.scrollLeft)}px;
+                        top: ${Math.round(target.scrollTop)}px;
+                        max-width: ${Math.round(boundBox.clientWidth)}px;
+                        max-height: ${Math.round(boundBox.clientHeight)}px;
+                    `;
+
+                } else {
+
+                    let parentRect;
+                    let margin = 20;
+
+                    if (boundBox.tagName == 'BODY') {
+
+                        parentRect = {
+                            width: boundBox.getBoundingClientRect().width,
+                            height: boundBox.getBoundingClientRect().height
+                        }
+                        parentRect.x = parentRect.left = document.body.offsetLeft;
+                        parentRect.y = parentRect.top = document.body.offsetTop;
+                        parentRect.right = parentRect.left + parentRect.width;
+                        parentRect.bottom = parentRect.top + parentRect.height;
+
+                    } else {
+
+                        parentRect = boundBox.getBoundingClientRect();
+
+                    }
+
+                    let targetRect = {
+                        width: target.getBoundingClientRect().width,
+                        height: target.getBoundingClientRect().height
+                    };
+                    targetRect.x = targetRect.left = target.getBoundingClientRect().left - parentRect.left;
+                    targetRect.y = targetRect.top = target.getBoundingClientRect().top - parentRect.top;
+                    targetRect.right = targetRect.left + targetRect.width;
+                    targetRect.bottom = targetRect.top + targetRect.height;
+
+                    let centerOfTarget = {
+                        x: targetRect.left + targetRect.width / 2,
+                        y: targetRect.top + targetRect.height / 2
+                    }
+
+                    let centerOfParent = {
+                        x: parentRect.width / 2,
+                        y: parentRect.height / 2
+                    }
+
+                    dialog.host.style = `
+                        display: initial;
+                        ${(centerOfTarget.x < centerOfParent.x) ? `left` : `right`}: 50%;
+                        transform: translateX(${(centerOfTarget.x < centerOfParent.x) ? `max(-50%, -${Math.round(centerOfTarget.x - margin / 2)}px)` : `min(50%, ${Math.round(parentRect.width - centerOfTarget.x - margin / 2)}px)`});
+                        ${(centerOfTarget.y < centerOfParent.y) ? `top: calc(100% + 5px)`: `bottom: calc(100% + 5px)`};
+                        max-width: ${Math.round(parentRect.width - margin)}px;
+                        max-height: ${Math.round((centerOfTarget.y < centerOfParent.y) ? (parentRect.height - targetRect.bottom) : targetRect.top) - margin}px;
+                    `;
+
+                }
 
             };
 
             target.onmouseenter = dialog.position;
             target.onclick = e => {
 
-                dialog.host.style.display = 'initial';
-                dialog.host.classList.toggle('fix');
+                let triggeredDialogs = e.composedPath().filter(tag => tag.tagName == 'CUSTOM-DIALOG').length;
+
+                if (!triggeredDialogs) {
+
+                    dialog.host.style.display = 'initial';
+                    dialog.host.classList.toggle('fix');
+
+                }
 
             };
             target.onmouseleave = e => {
@@ -380,7 +445,7 @@ class Dialog {
         persistent = false,
         textResolve = 'Ok',
         onClose = () => {},
-        onHelp = undefined
+        onHelp
     } = {}) {
 
         if (typeof textResolve != 'string' || !textResolve.trim()) {
@@ -496,7 +561,7 @@ class Dialog {
         textResolve = 'Ok',
         textReject = 'No',
         onClose = () => {},
-        onHelp = undefined
+        onHelp
     } = {}) {
 
         if (typeof textReject != 'string' || !textReject.trim()) {
@@ -603,7 +668,7 @@ class Dialog {
         discreet = true,
         duration = 0,
         onClose = () => {},
-        onHelp = undefined
+        onHelp
     } = {}) {
 
         if (typeof duration != 'number') {
@@ -689,7 +754,7 @@ class Dialog {
         persistent = false,
         fullScreen = false,
         onClose = () => {},
-        onHelp = undefined
+        onHelp
     } = {}) {
 
         let key = this.show(content, {

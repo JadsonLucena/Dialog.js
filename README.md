@@ -43,7 +43,7 @@ alert(
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape, Enter and Space
         textResolve = 'Ok',
         onClose = () => {},
-        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
+        onHelp // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         mainStyle?: string,
@@ -68,7 +68,7 @@ confirm(
         textResolve = 'Ok',
         textReject = 'No',
         onClose = () => {},
-        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
+        onHelp // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         mainStyle?: string,
@@ -93,7 +93,7 @@ notify(
         discreet = true, // If true, the dialog will appear in the lower right corner, otherwise, in the upper central part
         duration = 0, // If the given time is less than 3000ms, it will be calculated based on the total number of characters, although the minimum time is 3000ms
         onClose = () => {},
-        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
+        onHelp // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         footer?: string,
@@ -119,7 +119,7 @@ popUp(
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape
         fullScreen = false, // If true, the dialog will fill the entire window and the close button will change
         onClose = () => {},
-        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
+        onHelp // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         footer?: string,
@@ -140,16 +140,18 @@ show(
         footer = '',
         mainStyle = '',
         footerStyle = '',
+        target,
         script = () => {},
         persistent = false, // If true, the dialog does not close on the click outside or on the press of the Escape
         fullScreen = false, // If true, the dialog will fill the entire window
         onClose = () => {},
-        onHelp = undefined // If set, a button will be exposed in the dialog and the click event will trigger the callback
+        onHelp // If set, a button will be exposed in the dialog and the click event will trigger the callback
     }: {
         title?: string,
         footer?: string,
         mainStyle?: string,
         footerStyle?: string,
+        target?: HTMLElement,
         script?: (main: HTMLElement, footer: HTMLElement) => void,
         persistent?: boolean,
         fullScreen?: boolean,
