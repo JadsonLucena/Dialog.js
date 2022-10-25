@@ -9,10 +9,13 @@ It is a responsive and cross-browser dialog system that facilitates the creation
 ## Interfaces
 ```javascript
 // Constructor
-Dialog(
-    shadowRootMode?: ('open' | 'closed') = 'open', // A string specifying the encapsulation mode for the shadow DOM tree
-    delegatesFocus?: boolean = false, // When a non-focusable part of the shadow DOM is clicked, the first focusable part is given focus
-)
+Dialog({
+    shadowRootMode = 'open',
+    delegatesFocus = false
+}: {
+    shadowRootMode?: ('open' | 'closed'), // A string specifying the encapsulation mode for the shadow DOM tree
+    delegatesFocus?: boolean // When a non-focusable part of the shadow DOM is clicked, the first focusable part is given focus
+} = {})
 ```
 
 ```javascript
